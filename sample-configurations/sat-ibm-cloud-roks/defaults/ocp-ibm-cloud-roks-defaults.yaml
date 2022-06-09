@@ -1,0 +1,16 @@
+---
+vsi:
+- flavour: default
+  infrastructure:
+    image: ibm-redhat-8-3-minimal-amd64-3
+    profile: "cx2-2x4"
+- flavour: master
+  infrastructure:
+    image: ibm-redhat-7-9-minimal-amd64-5
+    profile: "bx2-4x16"
+
+nfs_server:
+- flavour: default  
+  infrastructure:
+    image: ibm-redhat-8-3-minimal-amd64-3
+    profile: "cx2-2x4"

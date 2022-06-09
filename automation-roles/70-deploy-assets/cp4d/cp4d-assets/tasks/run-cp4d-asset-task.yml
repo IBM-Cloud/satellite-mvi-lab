@@ -1,3 +1,0 @@
----
-- name: Run {{ config_dir }}/{{_current_cp4d_asset.asset_location }}/cp4d-asset.yaml task
-  include_tasks: "{{ config_dir }}/{{_current_cp4d_asset.asset_location }}/cp4d-asset.yaml"

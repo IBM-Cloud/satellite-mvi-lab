@@ -25,18 +25,18 @@ RUN ansible-galaxy collection install community.general community.crypto ansible
 VOLUME ["/Data"]
 
 # Prepare directory that runs automation scripts
-RUN mkdir -p /cloud-pak-deployer && \
+RUN mkdir -p /sat-deployer && \
     mkdir -p /Data
 
-COPY . /cloud-pak-deployer/
+COPY . /sat-deployer/
 
 ENV USER_UID=1001
 
 RUN chown -R ${USER_ID}:0 /Data && \
-    chown -R ${USER_ID}:0 /cloud-pak-deployer && \
-    chmod -R ug+rwx /cloud-pak-deployer/docker-scripts && \
-    chmod ug+rwx /cloud-pak-deployer/*.sh
+    chown -R ${USER_ID}:0 /sat-deployer && \
+    chmod -R ug+rwx /sat-deployer/docker-scripts && \
+    chmod ug+rwx /sat-deployer/*.sh
 
 # USER ${USER_UID}
 
-ENTRYPOINT ["/cloud-pak-deployer/docker-scripts/container-bash.sh"]
+ENTRYPOINT ["/sat-deployer/docker-scripts/container-bash.sh"]

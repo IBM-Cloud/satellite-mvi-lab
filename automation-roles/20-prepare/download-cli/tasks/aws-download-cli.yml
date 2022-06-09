@@ -1,4 +1,0 @@
----
-- name: Download ROSA command line tool 
-  include_role:
-    name: aws-download-rosa

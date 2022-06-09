@@ -1,3 +1,0 @@
----
-- name: Pause the Machine Config Operator
-  include_tasks: pause-mco.yml

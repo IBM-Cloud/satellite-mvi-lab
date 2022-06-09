@@ -7,16 +7,6 @@
 - include_tasks: ibmcloud-download-cli.yml
   when: cloud_platform == 'ibm-cloud'
 
-- include_tasks: aws-download-cli.yml
-  when: cloud_platform == 'aws'
-
-- include_tasks: azure-download-cli.yml
-  when: cloud_platform == 'azure'
-
-- name: Download and install cloudctl
-  include_role:
-    name: cloudctl-download
-
 - name: Download OpenShift client
   include_role:
     name: openshift-download-client
