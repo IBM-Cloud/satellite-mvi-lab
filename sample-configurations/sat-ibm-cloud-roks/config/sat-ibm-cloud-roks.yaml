@@ -46,6 +46,14 @@ cos:
 - name: {{ env_id }}-cos
   plan: standard
   location: global
+  buckets:
+  - name: {{ env_id }}-satellite-039287
+    region_location: eu-de
+
+satellite:
+- name: {{ env_id }}-sat
+  zones: [zone1, zone2, zone3]
+  bucket: {{ env_id }}-satellite-039287
 
 vsi:
 - name: {{ env_id }}-cp1
@@ -56,19 +64,19 @@ vsi:
     public_ip: False
     keys:
     - "{{ env_id }}-provision"
-- name: {{ env_id }}-cp2
-  flavour: master
-  infrastructure:
-    type: vpc
-    subnet: {{ env_id }}-subnet-zone-2
-    public_ip: False
-    keys:
-    - "{{ env_id }}-provision"
-- name: {{ env_id }}-cp3
-  flavour: master
-  infrastructure:
-    type: vpc
-    subnet: {{ env_id }}-subnet-zone-3
-    public_ip: False
-    keys:
-    - "{{ env_id }}-provision"
+# - name: {{ env_id }}-cp2
+#   flavour: master
+#   infrastructure:
+#     type: vpc
+#     subnet: {{ env_id }}-subnet-zone-2
+#     public_ip: False
+#     keys:
+#     - "{{ env_id }}-provision"
+# - name: {{ env_id }}-cp3
+#   flavour: master
+#   infrastructure:
+#     type: vpc
+#     subnet: {{ env_id }}-subnet-zone-3
+#     public_ip: False
+#     keys:
+#     - "{{ env_id }}-provision"

@@ -1,0 +1,15 @@
+resource "ibm_satellite_location" "{{generator.attributes.name | replace("-", "_") }}" {
+
+    location = "{{generator.attributes.name}}"
+    resource_group_id = data.ibm_resource_group.thisresourcegroup.id
+    zones =  {{generator.attributes.zones | default(["zone-1", "zome-2", "zone-3"]) | replace("'", "\"")}}
+    managed_from = "{{ ibm_cloud_location }}"
+
+    {% if generator.attributes.bucket is defined %}
+    cos_config {
+        bucket  = "{{generator.attributes.bucket}}"
+    }
+
+    depends_on = [ibm_cos_bucket.{{generator.attributes.cos_instance | replace("-", "_")}}_{{generator.attributes.bucket | replace("-", "_") }}]
+    {% endif %}
+}
