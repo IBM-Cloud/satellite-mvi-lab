@@ -1,8 +1,8 @@
 ---
 
 - set_fact:
-    bastion_host: "{{ current_nfs_server['infrastructure']['bastion_host'] }}"
-    nfs_server_ssh_key: "{{ current_nfs_server['infrastructure']['keys'][0] }}"
+    bastion_host: "{{ current_sat_host['infrastructure']['bastion_host'] }}"
+    nfs_server_ssh_key: "{{ current_sat_host['infrastructure']['keys'][0] }}"
 
 - name: Retrieve Terraform tfstate from the vault
   include_role: 
@@ -30,16 +30,16 @@
   debug:
     msg: "{{ bastion_fip }}"
 
-# Retrieve the private IP address of the NFS server
+# Retrieve the private IP address of the Satellite host
 - set_fact:
-    _nfs_server_ip: "{{ tfstate.resources | json_query(query) | first }}"
+    _sat_host_ip: "{{ tfstate.resources | json_query(query) | first }}"
   vars:
     query: >-
-      [?type=='ibm_is_instance' && instances[0].attributes.name=='{{ current_nfs_server.name }}'].instances[0].attributes.primary_network_interface[0].primary_ipv4_address
+      [?type=='ibm_is_instance' && instances[0].attributes.name=='{{ current_sat_host.name }}'].instances[0].attributes.primary_network_interface[0].primary_ipv4_address
 
-- name: NFS Server IP address
+- name: Sat Server IP address
   debug:
-    msg: "{{ _nfs_server_ip }}"    
+    msg: "{{ _sat_host_ip }}"    
 
 - name: Create temporary directory to hold SSH private key
   tempfile:
@@ -66,10 +66,10 @@
     groups: vpc_bastion_server
     ansible_ssh_private_key_file: "{{ ssh_key_dir.path }}/id_rsa"
 
-- name: Create dynamic Ansible group vpc_nfs_servers
+- name: Create dynamic Ansible group vpc_sat_hosts
   add_host:
-    name: "{{ _nfs_server_ip }}" 
-    groups: vpc_nfs_servers
+    name: "{{ _sat_host_ip }}" 
+    groups: vpc_sat_hosts
     ansible_ssh_private_key_file: "{{ ssh_key_dir.path }}/id_rsa"
     ansible_ssh_common_args: '-o ProxyCommand="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i {{ ssh_key_dir.path }}/id_rsa -W %h:%p -q {{ bastion_fip.public_ip_address }}"'
-    nfs_server: "{{ current_nfs_server }}"
+    nfs_server: "{{ current_sat_host }}"

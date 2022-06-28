@@ -11,7 +11,7 @@ command_usage() {
   echo "SUBCOMMAND:"
   echo "  environment,env           Apply configuration to create, modify or destroy an environment"
   echo "  vault                     Get, create, modify or delete secrets in the configured vault"
-  echo "  build                     Build the container image for the Cloud Pak Deployer"
+  echo "  build                     Build the container image for the Satellite Deployer"
   echo "  help,h                    Show help"
   echo
   echo "ACTION:"
@@ -543,7 +543,7 @@ fi
 eval set -- "$PARAMS"
 
 # --------------------------------------------------------------------------------------------------------- #
-# Run the Cloud Pak Deployer                                                                                #
+# Run the Satellite Deployer                                                                                #
 # --------------------------------------------------------------------------------------------------------- #
 
 # Show warning if --sat-develop is used

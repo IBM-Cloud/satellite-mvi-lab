@@ -6,7 +6,7 @@ echo "Entering Cloud Pak Deployer command line in a container."
 echo 'Use the "exit" command to leave the container and return to the hosting server.'
 echo "-------------------------------------------------------------------------------"
 
-export PS1='\[\e]0;\w\a\]\n[\#] \[\e[32m\u@Cloud Pak Deployer:\[\e[33m\]\w \e[m\$ ';
+export PS1='\[\e]0;\w\a\]\n[\#] \[\e[32m\u@Satellite Deployer:\[\e[33m\]\w \e[m\$ ';
 
 oc_zip=$(find $STATUS_DIR/downloads/ -name "openshift-client*" | tail -1)
 if [ "$oc_zip" != "" ];then

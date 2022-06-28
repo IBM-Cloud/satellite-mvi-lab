@@ -1,11 +1,9 @@
 # Container image including olm-utils
-FROM registry.access.redhat.com/ubi8/ubi
-FROM icr.io/cpopen/cpd/olm-utils:pre-release
+FROM centos:8
 
-LABEL authors="Arthur Laimbock, \
-            Markus Wiegleb, \
-            Frank Ketelaars, \ 
-            Jiri Petnik"
+RUN cd /etc/yum.repos.d/
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
 
 USER 0
 
@@ -19,6 +17,8 @@ RUN yum install -y yum-utils python38 python38-pip && \
     alternatives --set python /usr/bin/python3 && \
     yum install -y vault && \
     yum clean all
+
+RUN pip3 install ansible
 
 RUN ansible-galaxy collection install community.general community.crypto ansible.utils community.vmware
 

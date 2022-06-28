@@ -1,19 +1,5 @@
 from generatorPreProcessor import GeneratorPreProcessor
 
-# nfs_server:
-# - name: {{ env_id }}-nfs
-#   infrastructure:
-#     type: vpc
-#     subnet: {{ env_id }}-subnet
-#     zone: {{ ibm_cloud_region }}-1
-#     primary_ipv4_address: 10.231.0.197
-#     bastion_host: {{ env_id }}-bastion
-#     storage_profile: 10iops-tier
-#     volume_size_gb: 1000
-#     storage_folder: /data/nfs    
-#     keys:
-#     - "{{ env_id }}-provision"
-
 def preprocessor(attributes=None, fullConfig=None):
 
     g = GeneratorPreProcessor(attributes,fullConfig)
@@ -27,7 +13,6 @@ def preprocessor(attributes=None, fullConfig=None):
     g('infrastructure.bastion_host').isOptional()
     g('infrastructure.storage_profile').isRequired()
     g('infrastructure.volume_size_gb').isRequired()
-    g('infrastructure.storage_folder').isRequired()
     g('infrastructure.image').isRequired()
     g('infrastructure.allow_ip_spoofing').isOptional().mustBeOneOf([True,False])
     g('infrastructure.keys').isRequired()
@@ -37,5 +22,3 @@ def preprocessor(attributes=None, fullConfig=None):
         'errors': g.getErrors()
     }
     return result
-
-

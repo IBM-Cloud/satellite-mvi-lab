@@ -1,4 +1,8 @@
 ---
+
+#- name: Install required packages for Ansible
+#  raw: yum install -y python38
+
 - name: Enable TCP forwarding on bastion node
   lineinfile:
     path: /etc/ssh/sshd_config

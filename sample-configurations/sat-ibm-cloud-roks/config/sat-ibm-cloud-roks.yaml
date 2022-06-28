@@ -56,27 +56,23 @@ satellite:
   bucket: {{ env_id }}-satellite-039287
 
 vsi:
-- name: {{ env_id }}-cp1
-  flavour: master
+- name: {{ env_id }}-bastion
   infrastructure:
     type: vpc
     subnet: {{ env_id }}-subnet-zone-1
-    public_ip: False
+    primary_ipv4_address: 10.231.0.15
+    public_ip: True
     keys:
     - "{{ env_id }}-provision"
-# - name: {{ env_id }}-cp2
-#   flavour: master
-#   infrastructure:
-#     type: vpc
-#     subnet: {{ env_id }}-subnet-zone-2
-#     public_ip: False
-#     keys:
-#     - "{{ env_id }}-provision"
-# - name: {{ env_id }}-cp3
-#   flavour: master
-#   infrastructure:
-#     type: vpc
-#     subnet: {{ env_id }}-subnet-zone-3
-#     public_ip: False
-#     keys:
-#     - "{{ env_id }}-provision"
+
+sat_host:
+- name: {{ env_id }}-cp1
+  infrastructure:
+    type: vpc
+    subnet: {{ env_id }}-subnet-zone-1
+    primary_ipv4_address: 10.231.0.16
+    bastion_host: {{ env_id }}-bastion
+    storage_profile: 10iops-tier
+    volume_size_gb: 100
+    keys:
+    - "{{ env_id }}-provision"

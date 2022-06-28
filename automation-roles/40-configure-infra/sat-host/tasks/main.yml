@@ -1,0 +1,45 @@
+---
+
+- name: Login to IBM Cloud
+  include_role:
+    name: login-ibmcloud
+
+- name: Validate mandatory variables are defined
+  assert:
+    that:
+      - cloud_platform is defined
+
+- name: Validate cloud_platform is implemented
+  fail: msg="cloud_platform {{ cloud_platform }} is not implemented, current implemented cloud platforms are {{ implemented_cloud_platform_types }} "
+  when: "cloud_platform not in implemented_cloud_platform_types"
+
+- name: Show all configuration
+  debug:
+    var: all_config
+
+- name: Configure Satellite servers IBM Cloud VPC
+  include_tasks: ibmcloud-sat-host-vpc-prepare.yaml
+  loop: "{{ all_config.sat_host | default([]) }}"
+  loop_control:
+    loop_var: current_sat_host
+  when:
+  - cloud_platform == 'ibm-cloud'
+  - current_sat_host.infrastructure.type == 'vpc'
+
+- name: Validate satellite is defined
+  assert:
+    that:
+      - all_config.satellite[0]
+
+- name: Download attach script
+  shell: |
+    ibmcloud sat host attach --location {{all_config.satellite[0].name}} --operating-system RHEL -q
+  register: attach_download
+
+- set_fact:
+    sat_attach_script: "{{status_dir}}/downloads/attach_host.sh"
+
+- name: Store attach script in downloaod location
+  copy:
+    src: "{{attach_download.stdout}}"
+    dest: "{{sat_attach_script}}"

@@ -2,4 +2,4 @@
 - import_playbook: playbook-env-apply-10-validate.yml
 - import_playbook: playbook-env-apply-20-prepare.yml
 - import_playbook: playbook-env-apply-30-provision-infra.yml
-# - import_playbook: playbook-env-apply-40-configure-infra.yml
+- import_playbook: playbook-env-apply-40-configure-infra.yml

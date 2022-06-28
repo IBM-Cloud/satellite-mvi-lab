@@ -1,4 +1,5 @@
 ---
+
 - name: 40 - Configure infrastructure
   hosts: localhost
   connection: local
@@ -11,12 +12,12 @@
     ansible_callback_diy_playbook_on_include_msg: ""
 
   tasks:
-  - name: Assemble NFS Servers group
+  - name: Assemble Satellite Servers group
     include_role:
-      name: nfs-server
+      name: sat-host
     when: cloud_platform == 'ibm-cloud'
 
-- name: 40 - Configure infrastructure - Bastion servers
+- name: 40 - Configure infrastructure - Bastion server
   hosts: vpc_bastion_server
   become: True
   gather_facts: False
@@ -28,10 +29,10 @@
   tasks:
   - name: Configure bastion servers
     include_role: 
-      name: nfs-server-ibmcloud-vpc-bastion
+      name: sat-host-ibmcloud-vpc-bastion
 
-- name: 40 - Configure infrastructure - NFS servers
-  hosts: vpc_nfs_servers
+- name: 40 - Configure infrastructure - Satellite servers
+  hosts: vpc_sat_hosts
   become: True
   gather_facts: False
 
@@ -40,25 +41,25 @@
     ansible_callback_diy_runner_on_ok_msg: ""
 
   tasks:
-  - name: Configure NFS servers
+  - name: Configure Satellite servers
     include_role: 
-      name: nfs-server-ibmcloud-vpc-install
+      name: sat-host-ibmcloud-vpc-install
 
-- name: 40 - Configure infrastructure - Configure OpenShift
-  hosts: localhost
-  connection: local
-  become: True
-  environment:
-    KUBECONFIG: "{{ status_dir }}/openshift/kubeconfig"
+# - name: 40 - Configure infrastructure - Configure OpenShift
+#   hosts: localhost
+#   connection: local
+#   become: True
+#   environment:
+#     KUBECONFIG: "{{ status_dir }}/openshift/kubeconfig"
 
-  vars:
-    ansible_callback_diy_runner_on_skipped_msg: ""
-    ansible_callback_diy_runner_on_ok_msg: ""
+#   vars:
+#     ansible_callback_diy_runner_on_skipped_msg: ""
+#     ansible_callback_diy_runner_on_ok_msg: ""
 
-  tasks:
-  - name: Configure OpenShift cluster
-    include_role:
-      name: configure-openshift
-    loop: "{{ all_config.openshift | default([]) }}"
-    loop_control:
-      loop_var: current_openshift_cluster
+#   tasks:
+#   - name: Configure OpenShift cluster
+#     include_role:
+#       name: configure-openshift
+#     loop: "{{ all_config.openshift | default([]) }}"
+#     loop_control:
+#       loop_var: current_openshift_cluster
