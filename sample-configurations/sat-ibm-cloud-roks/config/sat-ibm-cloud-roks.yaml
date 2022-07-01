@@ -67,10 +67,33 @@ vsi:
 
 sat_host:
 - name: {{ env_id }}-cp1
+  type: master
   infrastructure:
     type: vpc
     subnet: {{ env_id }}-subnet-zone-1
     primary_ipv4_address: 10.231.0.16
+    bastion_host: {{ env_id }}-bastion
+    storage_profile: 10iops-tier
+    volume_size_gb: 100
+    keys:
+    - "{{ env_id }}-provision"
+- name: {{ env_id }}-cp2
+  type: master
+  infrastructure:
+    type: vpc
+    subnet: {{ env_id }}-subnet-zone-2
+    primary_ipv4_address: 10.231.0.70
+    bastion_host: {{ env_id }}-bastion
+    storage_profile: 10iops-tier
+    volume_size_gb: 100
+    keys:
+    - "{{ env_id }}-provision"
+- name: {{ env_id }}-cp3
+  type: master
+  infrastructure:
+    type: vpc
+    subnet: {{ env_id }}-subnet-zone-3
+    primary_ipv4_address: 10.231.0.140
     bastion_host: {{ env_id }}-bastion
     storage_profile: 10iops-tier
     volume_size_gb: 100

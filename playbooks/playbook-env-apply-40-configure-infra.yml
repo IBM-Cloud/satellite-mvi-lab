@@ -32,7 +32,7 @@
       name: sat-host-ibmcloud-vpc-bastion
 
 - name: 40 - Configure infrastructure - Satellite servers
-  hosts: vpc_sat_hosts
+  hosts: sat_hosts_master
   become: True
   gather_facts: False
 
@@ -44,6 +44,23 @@
   - name: Configure Satellite servers
     include_role: 
       name: sat-host-ibmcloud-vpc-install
+
+- name: 40 - Configure infrastructure - Satellite
+  hosts: localhost
+  connection: local
+  become: True
+  gather_facts: False
+
+  vars:
+    ansible_callback_diy_runner_on_skipped_msg: ""
+    ansible_callback_diy_runner_on_ok_msg: ""
+
+  tasks:
+  - name: Configure Satellite
+    include_role: 
+      name: satellite-configure
+    vars:
+      sat_hosts_cp: "{{groups['sat_hosts_master']}}"
 
 # - name: 40 - Configure infrastructure - Configure OpenShift
 #   hosts: localhost

@@ -66,10 +66,10 @@
     groups: vpc_bastion_server
     ansible_ssh_private_key_file: "{{ ssh_key_dir.path }}/id_rsa"
 
-- name: Create dynamic Ansible group vpc_sat_hosts
+- name: Create dynamic Ansible group
   add_host:
     name: "{{ _sat_host_ip }}" 
-    groups: vpc_sat_hosts
+    groups: "{{ new_host_group }}"
     ansible_ssh_private_key_file: "{{ ssh_key_dir.path }}/id_rsa"
     ansible_ssh_common_args: '-o ProxyCommand="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i {{ ssh_key_dir.path }}/id_rsa -W %h:%p -q {{ bastion_fip.public_ip_address }}"'
-    nfs_server: "{{ current_sat_host }}"
+    sat_host: "{{ current_sat_host }}"

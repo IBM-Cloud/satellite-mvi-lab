@@ -22,9 +22,12 @@
   loop: "{{ all_config.sat_host | default([]) }}"
   loop_control:
     loop_var: current_sat_host
+  vars:
+    new_host_group: 'sat_hosts_master'
   when:
   - cloud_platform == 'ibm-cloud'
   - current_sat_host.infrastructure.type == 'vpc'
+  - current_sat_host.type == 'master'
 
 - name: Validate satellite is defined
   assert:
