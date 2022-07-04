@@ -31,7 +31,7 @@
     include_role: 
       name: sat-host-ibmcloud-vpc-bastion
 
-- name: 40 - Configure infrastructure - Satellite servers
+- name: 40 - Configure infrastructure - Satellite servers - master
   hosts: sat_hosts_master
   become: True
   gather_facts: False
@@ -41,7 +41,21 @@
     ansible_callback_diy_runner_on_ok_msg: ""
 
   tasks:
-  - name: Configure Satellite servers
+  - name: Configure Satellite servers - masters
+    include_role: 
+      name: sat-host-ibmcloud-vpc-install
+
+- name: 40 - Configure infrastructure - Satellite servers - worker
+  hosts: sat_hosts_worker
+  become: True
+  gather_facts: False
+
+  vars:
+    ansible_callback_diy_runner_on_skipped_msg: ""
+    ansible_callback_diy_runner_on_ok_msg: ""
+
+  tasks:
+  - name: Configure Satellite servers - workers
     include_role: 
       name: sat-host-ibmcloud-vpc-install
 
@@ -61,22 +75,4 @@
       name: satellite-configure
     vars:
       sat_hosts_cp: "{{groups['sat_hosts_master']}}"
-
-# - name: 40 - Configure infrastructure - Configure OpenShift
-#   hosts: localhost
-#   connection: local
-#   become: True
-#   environment:
-#     KUBECONFIG: "{{ status_dir }}/openshift/kubeconfig"
-
-#   vars:
-#     ansible_callback_diy_runner_on_skipped_msg: ""
-#     ansible_callback_diy_runner_on_ok_msg: ""
-
-#   tasks:
-#   - name: Configure OpenShift cluster
-#     include_role:
-#       name: configure-openshift
-#     loop: "{{ all_config.openshift | default([]) }}"
-#     loop_control:
-#       loop_var: current_openshift_cluster
+      sat_hosts_worker: "{{groups['sat_hosts_worker']}}"

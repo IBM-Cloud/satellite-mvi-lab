@@ -1,0 +1,94 @@
+---
+- name: wait for all hosts to become ready
+  command: ibmcloud sat host ls --location {{all_config.satellite[0].name}} --output json -q
+  register: output
+  until: (output.stdout | from_json | json_query(query) | length > 0) and (output.stdout | from_json | json_query(query) | first in valid_result)
+  vars:
+    query: "[?name=='{{ hostvars[item]['sat_host']['name'] }}'].health.status"
+    valid_result: ['ready', 'normal', 'provisioning']
+  retries: 100
+  delay: 10
+  loop: "{{ sat_hosts_cp + sat_hosts_worker }}"
+
+- name: get zones
+  block:
+    - name: query location
+      command: ibmcloud sat location get --location {{all_config.satellite[0].name}} --output json -q
+      register: output
+    - name: set zones
+      set_fact:
+        _zones: "{{output.stdout | from_json | json_query('workerZones')}}"
+    - name: test
+      debug:
+        var: _zones
+
+- name: assign host to control plane
+  include_tasks: sat-assign-cp.yaml
+  vars:
+    cp_host: "{{item}}"
+    zone: "{{_zones[my_idx]}}"
+  loop: "{{ sat_hosts_cp }}"
+  loop_control:
+    index_var: my_idx
+
+- name: get ROKS cluster id
+  block:
+    - name: get clusters
+      command: ibmcloud sat cluster ls --output json -q
+      register: output
+
+    - set_fact:
+        _cluster_id: "{{ output.stdout | from_json | json_query(query) }}"
+      vars:
+        query: "clusterSearch[?metadata.name == '{{all_config.satellite[0].name}}-roks']"
+
+    - set_fact:
+        _cluster_id: "{{(_cluster_id | first).clusterId}}"
+      when: _cluster_id | length > 0
+
+- name: create cluster
+  block:
+  - name: wait for location being ready to deploy
+    command: ibmcloud sat location get --location {{all_config.satellite[0].name}} --output json -q
+    register: output
+    until: output.stdout | from_json | json_query(query) == True
+    vars:
+      query: "deployments.enabled"
+    retries: 100
+    delay: 10
+
+  - name: create cluster
+    command: ibmcloud oc cluster create satellite --location {{all_config.satellite[0].name}} --name {{all_config.satellite[0].name}}-roks --version 4.9_openshift --enable-config-admin --operating-system RHEL7
+  when: _cluster_id == []
+
+- name: wait for cluster
+  command: ibmcloud sat cluster ls --output json -q
+  register: output
+  until:  output.stdout | from_json | json_query(query) | length > 0
+  vars:
+    query: "clusterSearch[?metadata.name == '{{all_config.satellite[0].name}}-roks'].clusterId"
+  retries: 5
+  delay: 10
+
+- name: set ROKS cluster id
+  set_fact:
+    _cluster_id: "{{ output.stdout | from_json | json_query(query) | first }}"
+  vars:
+    query: "clusterSearch[?metadata.name == '{{all_config.satellite[0].name}}-roks'].clusterId"
+
+- name: assign zones to ROKS worker pool
+  include_tasks: sat-assign-zones.yaml
+  vars:
+    cluster_name: "{{all_config.satellite[0].name}}-roks"
+    zone: "{{item}}"
+  loop: "{{ _zones }}"
+
+- name: assign workers to ROKS
+  include_tasks: sat-assign-roks.yaml
+  vars:
+    roks_host: "{{item}}"
+    cluster_name: "{{all_config.satellite[0].name}}-roks"
+    zone: "{{_zones[my_idx]}}"
+  loop: "{{ sat_hosts_worker }}"
+  loop_control:
+    index_var: my_idx

@@ -99,3 +99,25 @@ sat_host:
     volume_size_gb: 100
     keys:
     - "{{ env_id }}-provision"
+- name: {{ env_id }}-worker1
+  type: worker
+  infrastructure:
+    type: vpc
+    subnet: {{ env_id }}-subnet-zone-1
+    primary_ipv4_address: 10.231.0.18
+    bastion_host: {{ env_id }}-bastion
+    storage_profile: 10iops-tier
+    volume_size_gb: 100
+    keys:
+    - "{{ env_id }}-provision"
+- name: {{ env_id }}-worker2
+  type: worker
+  infrastructure:
+    type: vpc
+    subnet: {{ env_id }}-subnet-zone-2
+    primary_ipv4_address: 10.231.0.72
+    bastion_host: {{ env_id }}-bastion
+    storage_profile: 10iops-tier
+    volume_size_gb: 100
+    keys:
+    - "{{ env_id }}-provision"

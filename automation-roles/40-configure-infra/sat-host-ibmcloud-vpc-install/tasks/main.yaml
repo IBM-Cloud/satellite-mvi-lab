@@ -3,6 +3,7 @@
   stat:
     path: "/etc/systemd/system/ibm-host-attach.service"
   register: stat_result
+  ignore_unreachable: true
 
 - name: Attach host to Satellite
   block:
@@ -26,4 +27,4 @@
     - name: run script
       shell: |
         /root/attach_host.sh
-  when: stat_result.stat.exists == False
+  when: stat_result.stat is defined and stat_result.stat.exists == False

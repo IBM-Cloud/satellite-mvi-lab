@@ -17,7 +17,7 @@
   debug:
     var: all_config
 
-- name: Configure Satellite servers IBM Cloud VPC
+- name: Configure Satellite servers IBM Cloud VPC - control plane
   include_tasks: ibmcloud-sat-host-vpc-prepare.yaml
   loop: "{{ all_config.sat_host | default([]) }}"
   loop_control:
@@ -28,6 +28,18 @@
   - cloud_platform == 'ibm-cloud'
   - current_sat_host.infrastructure.type == 'vpc'
   - current_sat_host.type == 'master'
+
+- name: Configure Satellite servers IBM Cloud VPC - workers
+  include_tasks: ibmcloud-sat-host-vpc-prepare.yaml
+  loop: "{{ all_config.sat_host | default([]) }}"
+  loop_control:
+    loop_var: current_sat_host
+  vars:
+    new_host_group: 'sat_hosts_worker'
+  when:
+  - cloud_platform == 'ibm-cloud'
+  - current_sat_host.infrastructure.type == 'vpc'
+  - current_sat_host.type == 'worker'
 
 - name: Validate satellite is defined
   assert:
