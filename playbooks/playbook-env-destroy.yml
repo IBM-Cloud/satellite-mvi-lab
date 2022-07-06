@@ -29,13 +29,16 @@
     - name: Download CLIs
       include_role:
         name: download-cli
-      
-    - name: Destroy OpenShift cluster contents where needed
+
+    - name: Login to IBM Cloud
       include_role:
-        name: destroy-openshift-config
-      loop: "{{ all_config.openshift | default([]) }}"
-      loop_control:
-        loop_var: current_openshift_cluster
+        name: login-ibmcloud
+
+    - name: Destroy OpenShift cluster
+      include_role:
+        name: destroy-openshift-sat
+      vars:
+        cluster_name: "{{all_config.satellite[0].name}}-roks"
 
     - include_role:
         name: destroy-terraform

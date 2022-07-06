@@ -86,19 +86,20 @@ env|environment)
 
   # Make sure that the logs of the Ansible playbook are written to a log file
   mkdir -p ${STATUS_DIR}/log
+  echo | tee ${STATUS_DIR}/log/sat-deployer.log
   run_cmd+=" | tee ${STATUS_DIR}/log/sat-deployer.log"
   echo "$run_cmd" >> /tmp/deployer_run_cmd.log
   set -o pipefail
   eval $run_cmd
   exit_code=$?
   if [ ${exit_code} -eq 0 ];then
-    echo | tee ${STATUS_DIR}/log/sat-deployer.log
-    echo "===========================================================================" | tee ${STATUS_DIR}/log/sat-deployer.log
-    echo "Deployer completed SUCCESSFULLY. If command line is not returned, press ^C." | tee ${STATUS_DIR}/log/sat-deployer.log
+    # echo | tee ${STATUS_DIR}/log/sat-deployer.log
+    echo "===========================================================================" | tee -a ${STATUS_DIR}/log/sat-deployer.log
+    echo "Deployer completed SUCCESSFULLY. If command line is not returned, press ^C." | tee -a ${STATUS_DIR}/log/sat-deployer.log
   else
-    echo | tee ${STATUS_DIR}/log/sat-deployer.log
-    echo "====================================================================================" | tee ${STATUS_DIR}/log/sat-deployer.log
-    echo "Deployer FAILED. Check previous messages. If command line is not returned, press ^C." | tee ${STATUS_DIR}/log/sat-deployer.log
+    # echo | tee ${STATUS_DIR}/log/sat-deployer.log
+    echo "====================================================================================" | tee -a ${STATUS_DIR}/log/sat-deployer.log
+    echo "Deployer FAILED. Check previous messages. If command line is not returned, press ^C." | tee -a ${STATUS_DIR}/log/sat-deployer.log
   fi
   exit ${exit_code}
   ;;

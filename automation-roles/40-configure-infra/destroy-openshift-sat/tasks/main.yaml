@@ -1,0 +1,28 @@
+---
+- name: get ROKS cluster id
+  block:
+    - name: get clusters
+      command: ibmcloud sat cluster ls --output json -q
+      register: output
+
+    - set_fact:
+        _cluster_id: "{{ output.stdout | from_json | json_query(query) }}"
+      vars:
+        query: "clusterSearch[?registration.name == '{{cluster_name}}']"
+
+    - set_fact:
+        _cluster_id: "{{(_cluster_id | first).clusterId}}"
+      when: _cluster_id | length > 0
+
+- name: delete cluster
+  command: ibmcloud oc cluster rm --cluster {{cluster_name}} -f -q
+  when: _cluster_id != []
+
+- name: wait for cluster to disappear
+  command: ibmcloud sat cluster ls --output json -q
+  register: output
+  until:  output.stdout | from_json | json_query(query) | length == 0
+  vars:
+    query: "clusterSearch[?metadata.name == '{{cluster_name}}'].clusterId"
+  retries: 100
+  delay: 10

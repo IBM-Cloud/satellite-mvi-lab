@@ -40,7 +40,7 @@
     - set_fact:
         _cluster_id: "{{ output.stdout | from_json | json_query(query) }}"
       vars:
-        query: "clusterSearch[?metadata.name == '{{all_config.satellite[0].name}}-roks']"
+        query: "clusterSearch[?registration.name == '{{all_config.satellite[0].name}}-roks']"
 
     - set_fact:
         _cluster_id: "{{(_cluster_id | first).clusterId}}"
@@ -54,7 +54,7 @@
     until: output.stdout | from_json | json_query(query) == True
     vars:
       query: "deployments.enabled"
-    retries: 100
+    retries: 170
     delay: 10
 
   - name: create cluster
@@ -67,7 +67,7 @@
   until:  output.stdout | from_json | json_query(query) | length > 0
   vars:
     query: "clusterSearch[?metadata.name == '{{all_config.satellite[0].name}}-roks'].clusterId"
-  retries: 5
+  retries: 50
   delay: 10
 
 - name: set ROKS cluster id
