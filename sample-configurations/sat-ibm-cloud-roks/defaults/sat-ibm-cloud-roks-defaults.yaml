@@ -2,15 +2,15 @@
 vsi:
 - flavour: default
   infrastructure:
-    image: ibm-redhat-8-3-minimal-amd64-3
+    image: ibm-redhat-8-4-minimal-amd64-3
     profile: "cx2-2x4"
 - flavour: master
   infrastructure:
-    image: ibm-redhat-7-9-minimal-amd64-5
+    image: ibm-redhat-7-9-minimal-amd64-6
     profile: "bx2-4x16"
 
-nfs_server:
+sat_host:
 - flavour: default  
   infrastructure:
-    image: ibm-redhat-8-3-minimal-amd64-3
-    profile: "cx2-2x4"
+    image: ibm-redhat-7-9-minimal-amd64-6
+    profile: "bx2-4x16"
