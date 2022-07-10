@@ -1,0 +1,8 @@
+[Interface]
+PrivateKey = {{ client_privkey }}
+Address = 10.138.118.2/32
+
+[Peer]
+PublicKey = {{ server_pubkey }}
+AllowedIPs = {{ allowed_ips }}
+Endpoint = {{ ansible_host }}:63412

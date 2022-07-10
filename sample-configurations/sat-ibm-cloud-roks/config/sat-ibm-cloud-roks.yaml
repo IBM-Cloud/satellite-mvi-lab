@@ -15,10 +15,12 @@ security_rule:
   tcp: {port_min: 443, port_max: 443}
 - name: ssh
   tcp: {port_min: 22, port_max: 22}
+- name: vpn
+  udp: {port_min: 63412, port_max: 63412}
 
 vpc:
 - name: {{ env_id }}
-  allow_inbound: ['ssh']
+  allow_inbound: ['ssh','vpn']
 
 address_prefix:
 - name: {{ env_id }}-zone-1
@@ -47,16 +49,17 @@ cos:
   plan: standard
   location: global
   buckets:
-  - name: {{ env_id }}-satellite-039287
-    region_location: eu-de
+  - name: {{ env_id }}-satellite-0392878
+    region_location: {{ ibm_cloud_region }}
 
 satellite:
 - name: {{ env_id }}-sat
   zones: [zone1, zone2, zone3]
-  bucket: {{ env_id }}-satellite-039287
+  bucket: {{ env_id }}-satellite-0392878
 
 vsi:
 - name: {{ env_id }}-bastion
+  flavour: bastion
   infrastructure:
     type: vpc
     subnet: {{ env_id }}-subnet-zone-1

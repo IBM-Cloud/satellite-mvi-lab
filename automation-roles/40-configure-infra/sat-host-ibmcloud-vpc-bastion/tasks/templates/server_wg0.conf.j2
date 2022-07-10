@@ -1,0 +1,14 @@
+
+# {{ ansible_managed }}
+[Interface]
+Address = 10.138.118.1/32
+SaveConfig = true
+PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -t nat -A POSTROUTING -o {{ansible_default_ipv4.alias}} -j MASQUERADE
+PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -t nat -D POSTROUTING -o {{ansible_default_ipv4.alias}} -j MASQUERADE
+ListenPort = 63412
+PrivateKey = {{ server_privkey }}
+
+[Peer]
+PublicKey = {{ client_pubkey }}
+AllowedIPs = 10.138.118.2/32
+PersistentKeepalive = 25

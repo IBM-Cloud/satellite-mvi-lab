@@ -8,6 +8,10 @@ vsi:
   infrastructure:
     image: ibm-redhat-7-9-minimal-amd64-6
     profile: "bx2-4x16"
+- flavour: bastion
+  infrastructure:
+    image: ibm-ubuntu-22-04-minimal-amd64-1
+    profile: "cx2-2x4"
 
 sat_host:
 - flavour: default  

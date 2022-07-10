@@ -20,7 +20,7 @@
 - name: 40 - Configure infrastructure - Bastion server
   hosts: vpc_bastion_server
   become: True
-  gather_facts: False
+  gather_facts: True
 
   vars:
     ansible_callback_diy_runner_on_skipped_msg: ""
@@ -30,6 +30,9 @@
   - name: Configure bastion servers
     include_role: 
       name: sat-host-ibmcloud-vpc-bastion
+    vars:
+      allowed_ips: "{{ hostvars['localhost']['all_config'] | json_query('subnet[*].ipv4_cidr_block') | join(',') }}"
+      client_conf_path: '{{status_dir}}/downloads/'
 
 - name: 40 - Configure infrastructure - Satellite servers - master
   hosts: sat_hosts_master

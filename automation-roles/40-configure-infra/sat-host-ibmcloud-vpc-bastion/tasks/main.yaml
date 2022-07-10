@@ -1,8 +1,4 @@
 ---
-
-#- name: Install required packages for Ansible
-#  raw: yum install -y python38
-
 - name: Enable TCP forwarding on bastion node
   lineinfile:
     path: /etc/ssh/sshd_config
@@ -14,3 +10,106 @@
   service:
     name: sshd
     state: restarted
+
+- name: check if wireguard has been set up
+  stat: 
+    path: /etc/wireguard/client.conf
+  register: client_conf
+
+- name: setup wireguard
+  block:
+    - name: install wireguard package
+      apt:
+        name: wireguard
+        state: present
+        update_cache: yes
+
+    - name: generate server keys
+      shell:
+        cmd: umask 077 && wg genkey | tee privatekey | wg pubkey > publickey
+        chdir: /etc/wireguard
+        creates: /etc/wireguard/publickey
+
+    - name: get public key
+      command: cat /etc/wireguard/publickey
+      register: server_publickey_contents
+      changed_when: False
+
+    - name: set public key fact
+      set_fact:
+        server_pubkey: "{{ server_publickey_contents.stdout }}"
+
+    - name: get private key
+      command: cat /etc/wireguard/privatekey
+      register: server_privatekey_contents
+      changed_when: False
+
+    - name: set private key fact
+      set_fact:
+        server_privkey: "{{ server_privatekey_contents.stdout }}"
+
+    - name: generate client keys
+      shell:
+        cmd: umask 077 && wg genkey | tee client_privatekey | wg pubkey > client_publickey
+        chdir: /etc/wireguard
+        creates: /etc/wireguard/client_publickey
+
+    - name: get public key
+      command: cat /etc/wireguard/client_publickey
+      register: client_publickey_contents
+      changed_when: False
+
+    - name: set public key fact
+      set_fact:
+        client_pubkey: "{{ client_publickey_contents.stdout }}"
+
+    - name: get private key
+      command: cat /etc/wireguard/client_privatekey
+      register: client_privatekey_contents
+      changed_when: False
+
+    - name: set private key fact
+      set_fact:
+        client_privkey: "{{ client_privatekey_contents.stdout }}"
+
+    - name: create server wireguard config
+      template:
+        dest: /etc/wireguard/wg0.conf
+        src: server_wg0.conf.j2
+        owner: root
+        group: root
+        mode: '0600'
+
+    - name: enable and persist ip forwarding
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: "1"
+        state: present
+        sysctl_set: yes
+        reload: yes
+
+    - name: start wireguard and enable on boot
+      systemd:
+        name: wg-quick@wg0
+        enabled: yes
+        state: started
+
+    - name: create client wireguard config
+      template:
+        dest: /etc/wireguard/client.conf
+        src: client_wg0.conf.j2
+        owner: root
+        group: root
+        mode: '0600'
+
+    - name: disable UFW
+      ufw:
+        state: disabled
+
+  when: client_conf.stat.exists != True
+
+- name: get wireguard client conf
+  fetch:
+    src: /etc/wireguard/client.conf
+    dest: "{{client_conf_path}}"
+    flat: yes
