@@ -54,7 +54,7 @@
     until: output.stdout | from_json | json_query(query) == True
     vars:
       query: "deployments.enabled"
-    retries: 170
+    retries: 250
     delay: 10
 
   - name: create cluster
