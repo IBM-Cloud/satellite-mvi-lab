@@ -19,10 +19,19 @@ sat_host:
     image: ibm-redhat-7-9-minimal-amd64-6
     profile: "bx2-4x16"
 - flavour: cp
+  type: master
   infrastructure:
+    type: vpc
     image: ibm-redhat-7-9-minimal-amd64-6
     profile: "bx2-8x32"
+    storage_profile: 5iops-tier
+    volume_size_gb: 100
 - flavour: odf
+  type: worker
   infrastructure:
+    type: vpc
     image: ibm-redhat-7-9-minimal-amd64-6
     profile: "bx2-16x64"
+    storage_profile: 5iops-tier
+    volume_size_gb: 100
+    volume2_size_gb: 500
