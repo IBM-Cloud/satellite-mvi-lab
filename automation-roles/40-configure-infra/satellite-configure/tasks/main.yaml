@@ -84,8 +84,19 @@
     zone: "{{_zones[hostvars[item]['sat_host']['sat_zone_idx'] | int - 1]}}"
   loop: "{{ sat_hosts_worker }}"
 
+- name: Retrieve Terraform tfstate from the vault
+  include_role: 
+    name: vault-get-secret
+  vars:
+    secret_name: "{{ environment_name }}-terraform-tfstate"
+    secret_group: "{{ environment_name }}"
+
+- set_fact:
+    _tfstate: "{{ secret_value }}"
+
 - name: attach volumes to odf nodes
   include_tasks: sat-host-attach-vol.yaml
   vars:
-    roks_host: "{{item}}"
+    roks_host: "{{ item }}"
+    tfstate: "{{ _tfstate }}"
   loop: "{{ sat_hosts_worker }}"

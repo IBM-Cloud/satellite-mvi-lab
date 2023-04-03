@@ -1,23 +1,25 @@
 ---
-- name: get volume id
-  command: ibmcloud is vols --zone {{ hostvars[roks_host]['sat_host']['infrastructure']['zone'] }} --resource-group-name {{ all_config.resource_group[0].name }} --output json -q
-  register: output
+- set_fact:
+    _odf_volume_name: "{{ hostvars[roks_host]['sat_host']['name']}}-data2"
 
-- name: parse volume id
-  set_fact:
-    _volume_id: "{{output.stdout | from_json | json_query(query) | first}}"
+- set_fact:
+    _odf_id: "{{ tfstate.resources | json_query(query) | first }}"
   vars:
-    query: "[?name=='{{hostvars[roks_host]['sat_host']['name']}}-data2'].id"
+    query: >-
+      [?type=='ibm_is_volume' && instances[0].attributes.name=='{{_odf_volume_name}}'].
+      {volume_id: instances[0].attributes.id, volume_name: instances[0].attributes.name}
+
+- name: get status
+  command: ibmcloud is vol {{ _odf_id.volume_id }} --output json -q
+  register: output
 
 - name: parse status
   set_fact:
-    _status: "{{output.stdout | from_json | json_query(query) | first}}"
-  vars:
-    query: "[?name=='{{hostvars[roks_host]['sat_host']['name']}}-data2'].attachment_state"
+    _status: "{{output.stdout | from_json | json_query('attachment_state')}}"
 
 - debug:
     var: _status
 
 - name: attach volume
-  command: ibmcloud is in-vola odf-vol {{ hostvars[roks_host]['sat_host']['name'] }} {{ _volume_id }}
+  command: ibmcloud is in-vola odf-vol {{ hostvars[roks_host]['sat_host']['name'] }} {{ _odf_id.volume_id }}
   when: _status == "unattached"
