@@ -1,8 +1,18 @@
 {# start - sat-host definition #}
 
 
+data "ibm_satellite_attach_host_script" "{{generator.attributes.name | replace("-", "_") }}" {
+  location =  "{{generator.attributes.sat_location}}"
+  host_provider = "ibm"
+  coreos_host = "true"
+
+  depends_on = [ibm_satellite_location.{{generator.attributes.sat_location | replace("-", "_") }}]
+}
+
 data "ibm_is_image" "{{generator.attributes.name | replace("-", "_") }}" {
     name = "{{generator.attributes.infrastructure.image}}"
+
+    depends_on = [ibm_is_image.{{generator.attributes.infrastructure.image | replace("-", "_") }}]
 }
 
 resource "ibm_is_volume" "{{generator.attributes.name | replace("-", "_") }}_data" {
@@ -15,6 +25,19 @@ resource "ibm_is_volume" "{{generator.attributes.name | replace("-", "_") }}_dat
       ignore_changes = [ resource_group ]
     }
 }
+
+{% if generator.attributes.infrastructure.volume2_size_gb is defined %}
+resource "ibm_is_volume" "{{generator.attributes.name | replace("-", "_") }}_data2" {
+    name           = "{{ generator.attributes.name }}-data2"
+    resource_group = data.ibm_resource_group.thisresourcegroup.id
+    profile        = "{{ generator.attributes.infrastructure.storage_profile }}"
+    zone           = "{{ generator.attributes.infrastructure.zone }}"
+    capacity       = {{ generator.attributes.infrastructure.volume2_size_gb}}
+    lifecycle {
+      ignore_changes = [ resource_group ]
+    }
+}
+{% endif %}
 
 resource "ibm_is_instance" "{{generator.attributes.name | replace("-", "_") }}" {
     name = "{{generator.attributes.name }}"
@@ -41,9 +64,13 @@ resource "ibm_is_instance" "{{generator.attributes.name | replace("-", "_") }}" 
         allow_ip_spoofing = "{{ generator.attributes.infrastructure.allow_ip_spoofing | default('false') | lower }}"
     }
 
+    user_data = data.ibm_satellite_attach_host_script.{{ generator.attributes.name | replace("-", "_") }}.host_script
 
     volumes = [
         ibm_is_volume.{{generator.attributes.name | replace("-", "_") }}_data.id
+        {% if generator.attributes.infrastructure.volume2_size_gb is defined %}
+        , ibm_is_volume.{{generator.attributes.name | replace("-", "_") }}_data2.id
+        {% endif %}
     ]
     lifecycle {
       ignore_changes = [ resource_group ]

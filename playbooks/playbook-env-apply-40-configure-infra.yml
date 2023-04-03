@@ -27,7 +27,7 @@
     ansible_callback_diy_runner_on_ok_msg: ""
 
   tasks:
-  - name: Configure bastion servers
+  - name: Configure bastion server
     include_role: 
       name: sat-host-ibmcloud-vpc-bastion
     vars:
@@ -47,7 +47,7 @@
   - name: Configure Satellite servers - masters
     include_role: 
       name: sat-host-ibmcloud-vpc-install
-
+    
 - name: 40 - Configure infrastructure - Satellite servers - worker
   hosts: sat_hosts_worker
   become: True

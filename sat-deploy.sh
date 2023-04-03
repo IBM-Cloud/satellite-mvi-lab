@@ -627,14 +627,14 @@ if ! $INSIDE_CONTAINER;then
   run_cmd+=" --cap-add=IPC_LOCK"
 
   if [ "${STATUS_DIR}" != "" ];then
-    run_cmd+=" -v ${STATUS_DIR}:/data/status:z "
+    run_cmd+=" -v ${STATUS_DIR}:/data/status "
   fi
 
   if [ "${CONFIG_DIR}" != "" ];then
-    run_cmd+=" -v ${CONFIG_DIR}:/data/config:z"
+    run_cmd+=" -v ${CONFIG_DIR}:/data/config"
   fi
 
-  if $SAT_DEVELOP;then run_cmd+=" -v ${PWD}:/sat-deployer:z";fi
+  if $SAT_DEVELOP;then run_cmd+=" -v ${PWD}:/sat-deployer";fi
 
   run_cmd+=" -e SUBCOMMAND=${SUBCOMMAND}"
   run_cmd+=" -e ACTION=${ACTION}"
@@ -651,7 +651,7 @@ if ! $INSIDE_CONTAINER;then
               -e VAULT_SECRET_VALUE=\"${VAULT_SECRET_VALUE}\" \
               -e VAULT_SECRET_FILE=${VAULT_SECRET_FILE}"
     if [ ! -z $VAULT_SECRET_FILE ];then
-      run_cmd+=" -v ${VAULT_SECRET_FILE}:${VAULT_SECRET_FILE}:z"
+      run_cmd+=" -v ${VAULT_SECRET_FILE}:${VAULT_SECRET_FILE}"
     fi
   fi
 
@@ -661,17 +661,17 @@ if ! $INSIDE_CONTAINER;then
 
   if [ ! -z $VAULT_CERT_CA_FILE ];then
     run_cmd+=" -e VAULT_CERT_CA_FILE=${VAULT_CERT_CA_FILE}"
-    run_cmd+=" -v ${VAULT_CERT_CA_FILE}:${VAULT_CERT_CA_FILE}:z"
+    run_cmd+=" -v ${VAULT_CERT_CA_FILE}:${VAULT_CERT_CA_FILE}"
   fi
 
   if [ ! -z $VAULT_CERT_KEY_FILE ];then
     run_cmd+=" -e VAULT_CERT_KEY_FILE=${VAULT_CERT_KEY_FILE}"
-    run_cmd+=" -v ${VAULT_CERT_KEY_FILE}:${VAULT_CERT_KEY_FILE}:z"
+    run_cmd+=" -v ${VAULT_CERT_KEY_FILE}:${VAULT_CERT_KEY_FILE}"
   fi
 
   if [ ! -z $VAULT_CERT_CERT_FILE ];then
     run_cmd+=" -e VAULT_CERT_CERT_FILE=${VAULT_CERT_CERT_FILE}"
-    run_cmd+=" -v ${VAULT_CERT_CERT_FILE}:${VAULT_CERT_CERT_FILE}:z"
+    run_cmd+=" -v ${VAULT_CERT_CERT_FILE}:${VAULT_CERT_CERT_FILE}"
   fi
 
   run_cmd+=" -e ANSIBLE_VERBOSE=${ANSIBLE_VERBOSE}"
@@ -697,6 +697,7 @@ if ! $INSIDE_CONTAINER;then
 
   # If running "environment" subcommand with apply/destroy, follow log
   if [ "$SUBCOMMAND" == "environment" ] && [[ "${ACTION}" == "apply" || "${ACTION}" == "destroy" ]];then
+  echo $run_cmd
     CURRENT_CONTAINER_ID=$(eval $run_cmd)
     ACTIVE_CONTAINER_ID=${CURRENT_CONTAINER_ID}
     if [ "${STATUS_DIR}" != "" ];then

@@ -22,14 +22,12 @@
       debug:
         var: _zones
 
-- name: assign host to control plane
+- name: assign hosts to control plane
   include_tasks: sat-assign-cp.yaml
   vars:
     cp_host: "{{item}}"
-    zone: "{{_zones[my_idx]}}"
+    zone: "{{_zones[hostvars[item]['sat_host']['sat_zone_idx'] | int - 1]}}"
   loop: "{{ sat_hosts_cp }}"
-  loop_control:
-    index_var: my_idx
 
 - name: get ROKS cluster id
   block:
@@ -58,7 +56,7 @@
     delay: 10
 
   - name: create cluster
-    command: ibmcloud oc cluster create satellite --location {{all_config.satellite[0].name}} --name {{all_config.satellite[0].name}}-roks --version 4.9_openshift --enable-config-admin --operating-system RHEL7
+    command: ibmcloud oc cluster create satellite --location {{all_config.satellite[0].name}} --name {{all_config.satellite[0].name}}-roks --version 4.10_openshift --enable-config-admin --operating-system RHCOS
   when: _cluster_id == []
 
 - name: wait for cluster
@@ -88,7 +86,5 @@
   vars:
     roks_host: "{{item}}"
     cluster_name: "{{all_config.satellite[0].name}}-roks"
-    zone: "{{_zones[my_idx]}}"
+    zone: "{{_zones[hostvars[item]['sat_host']['sat_zone_idx'] | int - 1]}}"
   loop: "{{ sat_hosts_worker }}"
-  loop_control:
-    index_var: my_idx

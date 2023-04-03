@@ -14,10 +14,13 @@ def preprocessor(attributes=None, fullConfig=None):
     g('infrastructure.bastion_host').isOptional()
     g('infrastructure.storage_profile').isRequired()
     g('infrastructure.volume_size_gb').isRequired()
+    g('infrastructure.volume2_size_gb').isOptional()
     g('infrastructure.image').isRequired()
     g('infrastructure.allow_ip_spoofing').isOptional().mustBeOneOf([True,False])
     g('infrastructure.keys').isRequired()
     
+    g('sat_location').expandWith('satellite[0]').isRequired()
+
     result = {
         'attributes_updated': g.getExpandedAttributes(),
         'errors': g.getErrors()

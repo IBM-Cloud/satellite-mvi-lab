@@ -1,12 +1,14 @@
 ---
-- name: Check if already attached
-  stat:
-    path: "/etc/systemd/system/ibm-host-attach.service"
-  register: stat_result
-  ignore_unreachable: true
-
-- name: Attach host to Satellite
+- name: attach satellite host
   block:
+  - name: Check if already attached
+    stat:
+      path: "/etc/systemd/system/ibm-host-attach.service"
+    register: stat_result
+    ignore_unreachable: true
+
+  - name: Attach host to Satellite
+    block:
     - name: Enable subscriptions
       rhsm_repository:
         name: "{{ item }}"
@@ -27,4 +29,5 @@
     - name: run script
       shell: |
         /root/attach_host.sh
-  when: stat_result.stat is defined and stat_result.stat.exists == False
+    when: stat_result.stat is defined and stat_result.stat.exists == False
+  when: (hostvars[inventory_hostname]['sat_host']['os'] is defined) and (hostvars[inventory_hostname]['sat_host']['os'] == 'RHEL')

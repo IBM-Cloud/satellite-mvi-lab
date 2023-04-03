@@ -4,7 +4,7 @@ provider:
   region: {{ ibm_cloud_region }}
 
 resource_group:
-- name: "deployer" # should exist already
+- name: "mvi-on-sat" # should exist already
 
 ssh_keys:
 - name: {{ env_id }}-provision
@@ -17,10 +17,14 @@ security_rule:
   tcp: {port_min: 22, port_max: 22}
 - name: vpn
   udp: {port_min: 63412, port_max: 63412}
+- name: http
+  tcp: {port_min: 80, port_max: 80}
+- name: metrics
+  tcp: {port_min: 1936, port_max: 1936}
 
 vpc:
-- name: {{ env_id }}
-  allow_inbound: ['ssh','vpn']
+- name: {{ env_id }}-vpc
+  allow_inbound: ['ssh','vpn','http','https','metrics']
 
 address_prefix:
 - name: {{ env_id }}-zone-1
@@ -31,7 +35,7 @@ address_prefix:
   cidr: 10.231.0.64/26
 - name: {{ env_id }}-zone-3
   zone: {{ ibm_cloud_region }}-3
-  cidr: 10.231.0.128/25 
+  cidr: 10.231.0.128/26 
 
 subnet:
 - name: {{ env_id }}-subnet-zone-1
@@ -52,6 +56,11 @@ cos:
   - name: {{ env_id }}-satellite-0392878
     region_location: {{ ibm_cloud_region }}
 
+custom_image:
+- name: rhcos410
+  href: "cos://eu-de/images-mvi-on-sat/rhcos-4.10.37-x86_64-ibmcloud.x86_64.qcow2"
+  operating_system: fedora-coreos-stable-amd64
+
 satellite:
 - name: {{ env_id }}-sat
   zones: [zone1, zone2, zone3]
@@ -70,57 +79,89 @@ vsi:
 
 sat_host:
 - name: {{ env_id }}-cp1
+  flavour: cp
   type: master
+  sat_zone_idx: 1
   infrastructure:
+    image: rhcos410
     type: vpc
     subnet: {{ env_id }}-subnet-zone-1
     primary_ipv4_address: 10.231.0.16
     bastion_host: {{ env_id }}-bastion
-    storage_profile: 10iops-tier
+    storage_profile: 5iops-tier
     volume_size_gb: 100
     keys:
     - "{{ env_id }}-provision"
 - name: {{ env_id }}-cp2
+  flavour: cp
   type: master
+  sat_zone_idx: 2
   infrastructure:
+    image: rhcos410
     type: vpc
     subnet: {{ env_id }}-subnet-zone-2
     primary_ipv4_address: 10.231.0.70
     bastion_host: {{ env_id }}-bastion
-    storage_profile: 10iops-tier
+    storage_profile: 5iops-tier
     volume_size_gb: 100
     keys:
     - "{{ env_id }}-provision"
 - name: {{ env_id }}-cp3
+  flavour: cp
   type: master
+  sat_zone_idx: 3
   infrastructure:
+    image: rhcos410
     type: vpc
     subnet: {{ env_id }}-subnet-zone-3
     primary_ipv4_address: 10.231.0.140
     bastion_host: {{ env_id }}-bastion
-    storage_profile: 10iops-tier
+    storage_profile: 5iops-tier
     volume_size_gb: 100
     keys:
     - "{{ env_id }}-provision"
 - name: {{ env_id }}-worker1
+  flavour: odf
   type: worker
+  sat_zone_idx: 1
   infrastructure:
+    image: rhcos410
     type: vpc
     subnet: {{ env_id }}-subnet-zone-1
     primary_ipv4_address: 10.231.0.18
     bastion_host: {{ env_id }}-bastion
-    storage_profile: 10iops-tier
+    storage_profile: 5iops-tier
     volume_size_gb: 100
+    volume2_size_gb: 500
     keys:
     - "{{ env_id }}-provision"
 - name: {{ env_id }}-worker2
+  flavour: odf
   type: worker
+  sat_zone_idx: 2
   infrastructure:
+    image: rhcos410
     type: vpc
     subnet: {{ env_id }}-subnet-zone-2
     primary_ipv4_address: 10.231.0.72
     bastion_host: {{ env_id }}-bastion
-    storage_profile: 10iops-tier
+    storage_profile: 5iops-tier
     volume_size_gb: 100
+    volume2_size_gb: 500
+    keys:
+    - "{{ env_id }}-provision"
+- name: {{ env_id }}-worker3
+  flavour: odf
+  type: worker
+  sat_zone_idx: 3
+  infrastructure:
+    image: rhcos410
+    type: vpc
+    subnet: {{ env_id }}-subnet-zone-3
+    primary_ipv4_address: 10.231.0.142
+    bastion_host: {{ env_id }}-bastion
+    storage_profile: 5iops-tier
+    volume_size_gb: 100
+    volume2_size_gb: 500
     keys:
     - "{{ env_id }}-provision"

@@ -3,7 +3,7 @@
   hosts: localhost
   connection: local
   become: True
-  gather_facts: False
+  gather_facts: True
 
   vars:
     ansible_callback_diy_runner_on_skipped_msg: ""

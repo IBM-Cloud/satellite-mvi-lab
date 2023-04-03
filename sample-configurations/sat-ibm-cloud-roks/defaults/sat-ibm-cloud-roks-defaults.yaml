@@ -18,3 +18,11 @@ sat_host:
   infrastructure:
     image: ibm-redhat-7-9-minimal-amd64-6
     profile: "bx2-4x16"
+- flavour: cp
+  infrastructure:
+    image: ibm-redhat-7-9-minimal-amd64-6
+    profile: "bx2-8x32"
+- flavour: odf
+  infrastructure:
+    image: ibm-redhat-7-9-minimal-amd64-6
+    profile: "bx2-16x64"

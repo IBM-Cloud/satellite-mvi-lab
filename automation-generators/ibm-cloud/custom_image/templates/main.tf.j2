@@ -1,0 +1,6 @@
+resource "ibm_is_image" "{{generator.attributes.name | replace("-", "_") }}" {
+    name = "{{generator.attributes.name}}"
+    href = "{{generator.attributes.href}}"
+    operating_system = "{{generator.attributes.operating_system}}"
+    resource_group = data.ibm_resource_group.thisresourcegroup.id
+}

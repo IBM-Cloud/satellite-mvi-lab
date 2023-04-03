@@ -47,14 +47,16 @@
       - all_config.satellite[0]
 
 - name: Download attach script
-  shell: |
-    ibmcloud sat host attach --location {{all_config.satellite[0].name}} --operating-system RHEL -q
-  register: attach_download
+  block:
+    - name: download
+      shell: |
+        ibmcloud sat host attach --location {{all_config.satellite[0].name}} --operating-system RHEL -q
+      register: attach_download
 
-- set_fact:
-    sat_attach_script: "{{status_dir}}/downloads/attach_host.sh"
+    - set_fact:
+        sat_attach_script: "{{status_dir}}/downloads/attach_host.sh"
 
-- name: Store attach script in downloaod location
-  copy:
-    src: "{{attach_download.stdout}}"
-    dest: "{{sat_attach_script}}"
+    - name: Store attach script in downloaod location
+      copy:
+        src: "{{attach_download.stdout}}"
+        dest: "{{sat_attach_script}}"

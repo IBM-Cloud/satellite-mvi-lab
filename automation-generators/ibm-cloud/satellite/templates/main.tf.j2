@@ -4,6 +4,7 @@ resource "ibm_satellite_location" "{{generator.attributes.name | replace("-", "_
     resource_group_id = data.ibm_resource_group.thisresourcegroup.id
     zones =  {{generator.attributes.zones | default(["zone-1", "zome-2", "zone-3"]) | replace("'", "\"")}}
     managed_from = "{{ ibm_cloud_location }}"
+    coreos_enabled = "true"
 
     {% if generator.attributes.bucket is defined %}
     cos_config {
