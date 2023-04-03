@@ -20,7 +20,7 @@ RUN yum install -y yum-utils python38 python38-pip && \
 
 RUN pip3 install ansible
 
-RUN ansible-galaxy collection install community.general community.crypto ansible.utils community.vmware
+RUN ansible-galaxy collection install community.general community.crypto ansible.utils community.vmware ibm.mas_devops
 
 VOLUME ["/Data"]
 
