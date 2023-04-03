@@ -3,6 +3,16 @@
   debug:
     msg: '{{ relative_path_to_config_file }}'
 
+- name: generate uuid
+  set_fact:
+    _uuid: "{{ 99999999 | random | to_uuid }}"
+
+- name: replace <randon>
+  replace:
+    path: "{{ absolute_path_to_config_file }}"
+    regexp: '<random>'
+    replace: "{{ _uuid }}"
+
 - name: Generate config through template
   template:
     src: "{{ absolute_path_to_config_file }}"

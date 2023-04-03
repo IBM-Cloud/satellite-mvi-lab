@@ -1,0 +1,37 @@
+---
+- name: wait for host to become ready
+  block:
+  - name: Set the retry count
+    set_fact:
+      retry_count: "{{ 0 if retry_count is undefined else retry_count|int + 1 }}"
+  
+  - name: get hosts
+    command: ibmcloud sat host ls --location {{all_config.satellite[0].name}} --output json -q
+    register: output
+
+  - name: parse json
+    set_fact:
+      _parsed_json: "{{output.stdout | from_json}}"
+
+  - name: check state
+    debug:
+      msg: "{{_parsed_json | json_query(query)}}"
+    failed_when: (not (_parsed_json | json_query(query) | length > 0)) or 
+                 (not (_parsed_json | json_query(query) | first in valid_result))
+    vars:
+      query: "[?name=='{{ hostvars[_host]['sat_host']['name'] }}'].health.status"
+      valid_result: ['ready', 'normal', 'provisioning']
+
+  rescue:
+    - fail:
+        msg: Ended after 5 retries
+      when: retry_count | int == 100
+
+    - debug:
+        msg: "Host not ready - Retrying..."
+
+    - name: Sleep between retries
+      wait_for:
+        timeout: 10 # seconds
+
+    - include_tasks: sat-hosts-wait.yaml

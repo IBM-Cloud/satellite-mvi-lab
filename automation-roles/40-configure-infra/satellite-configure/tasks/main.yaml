@@ -1,13 +1,8 @@
 ---
 - name: wait for all hosts to become ready
-  command: ibmcloud sat host ls --location {{all_config.satellite[0].name}} --output json -q
-  register: output
-  until: (output.stdout | from_json | json_query(query) | length > 0) and (output.stdout | from_json | json_query(query) | first in valid_result)
+  include_tasks: sat-hosts-wait.yaml
   vars:
-    query: "[?name=='{{ hostvars[item]['sat_host']['name'] }}'].health.status"
-    valid_result: ['ready', 'normal', 'provisioning']
-  retries: 100
-  delay: 10
+    _host: "{{item}}"
   loop: "{{ sat_hosts_cp + sat_hosts_worker }}"
 
 - name: get zones
@@ -87,4 +82,10 @@
     roks_host: "{{item}}"
     cluster_name: "{{all_config.satellite[0].name}}-roks"
     zone: "{{_zones[hostvars[item]['sat_host']['sat_zone_idx'] | int - 1]}}"
+  loop: "{{ sat_hosts_worker }}"
+
+- name: attach volumes to odf nodes
+  include_tasks: sat-host-attach-vol.yaml
+  vars:
+    roks_host: "{{item}}"
   loop: "{{ sat_hosts_worker }}"

@@ -53,7 +53,7 @@ cos:
   plan: standard
   location: global
   buckets:
-  - name: {{ env_id }}-satellite-0392878
+  - name: {{ env_id }}-satellite-<random>
     region_location: {{ ibm_cloud_region }}
 
 custom_image:
@@ -64,7 +64,7 @@ custom_image:
 satellite:
 - name: {{ env_id }}-sat
   zones: [zone1, zone2, zone3]
-  bucket: {{ env_id }}-satellite-0392878
+  bucket: {{ env_id }}-satellite-<random>
 
 vsi:
 - name: {{ env_id }}-bastion

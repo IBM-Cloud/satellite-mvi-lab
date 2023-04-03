@@ -617,7 +617,7 @@ fi
 
 # Build command when not running inside container
 if ! $INSIDE_CONTAINER;then
-  run_cmd="${CONTAINER_ENGINE} run"
+  run_cmd="${CONTAINER_ENGINE} run --rm"
 
   # If running "environment" subcommand with apply or destroy, run as daemon
   if [ "$SUBCOMMAND" == "environment" ] && [[ "${ACTION}" == "apply" || "${ACTION}" == "destroy" ]];then
