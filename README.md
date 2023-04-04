@@ -9,6 +9,7 @@
 podman machine init --cpus=4 --memory=4096 -v $HOME:$HOME
 ```
 - publicly accessable qcow image to RHCOS. e.g. cos://eu-de/images-mvi-on-sat/rhcos-4.10.37-x86_64-ibmcloud.x86_64.qcow2
+- resource group should exist
 
 ### prepare
 - make sure podman is installed
@@ -22,7 +23,8 @@ podman machine init --cpus=4 --memory=4096 -v $HOME:$HOME
   mkdir -p data/status/sample
   cp -r ./sample-configurations/sat-ibm-cloud-roks/* data/config/sample
 ```
-- update href for custom_image in data/config/sample/sat-ibm-cloud-roks.yaml
+- update resource_group in data/config/sample/config/sat-ibm-cloud-roks.yaml
+- update href for custom_image in data/config/sample/config/sat-ibm-cloud-roks.yaml
 
 ### create artifacts
 
