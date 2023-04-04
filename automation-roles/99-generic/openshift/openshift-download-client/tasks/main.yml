@@ -21,8 +21,7 @@
 - name: Unpack Terraform from {{ status_dir }}/downloads/terraform_linux_amd64.zip
   set_fact:
     _openshift_client_package: "{{_openshift_client_package_arm}}"
-  when:
-    ansible_architecture == "aarch64"
+  when: ansible_architecture == 'aarch64'
 
 - name: Check if OpenShift client was already downloaded
   stat:

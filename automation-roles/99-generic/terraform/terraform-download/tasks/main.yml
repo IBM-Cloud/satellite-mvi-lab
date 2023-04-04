@@ -27,8 +27,7 @@
     unarchive:
       src: "{{ status_dir }}/downloads/terraform_linux_amd64.zip"
       dest: "/usr/local/bin"
-  when:
-    ansible_architecture == "amd64"
+  when: ansible_architecture == 'x86_64'
 
 - name: Download Terraform for arm64
   block:
@@ -50,8 +49,7 @@
     unarchive:
       src: "{{ status_dir }}/downloads/terraform_linux_arm64.zip"
       dest: "/usr/local/bin"
-  when:
-    ansible_architecture == "aarch64"
+  when: ansible_architecture == 'aarch64'
 
 - name: Get Terraform version
   shell: |
