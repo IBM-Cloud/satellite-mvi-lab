@@ -31,6 +31,7 @@ RUN mkdir -p /sat-deployer && \
 COPY . /sat-deployer/
 
 ENV USER_UID=1001
+ENV LC_ALL C.UTF-8
 
 RUN chown -R ${USER_ID}:0 /Data && \
     chown -R ${USER_ID}:0 /sat-deployer && \
