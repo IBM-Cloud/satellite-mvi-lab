@@ -1,0 +1,55 @@
+data "ibm_is_subnet" "{{ generator.attributes.subnet | replace("-", "_") }}" {
+  name = "{{ generator.attributes.subnet }}"
+
+  depends_on = [ibm_is_subnet.{{ generator.attributes.subnet | replace("-", "_") }}]
+}
+
+resource "ibm_is_lb" "{{generator.attributes.name | replace("-", "_") }}" {
+  resource_group = data.ibm_resource_group.thisresourcegroup.id
+  name     = "{{ generator.attributes.name }}"
+  subnets = [data.ibm_is_subnet.{{ generator.attributes.subnet | replace("-", "_") }}.id]
+  profile = "network-fixed"
+}
+
+{% for backend in generator.attributes.backends %}
+
+resource "ibm_is_lb_pool" "{{ backend.name | replace("-", "_") }}" {
+  name        = "{{ backend.name }}"
+  lb          = ibm_is_lb.{{generator.attributes.name | replace("-", "_") }}.id
+  algorithm   = "round_robin"
+  protocol    = "tcp"
+  health_delay  = 5
+  health_retries = 2
+  health_timeout = 2
+  health_type    = "tcp"
+}
+
+{% for server in backend.servers %}
+
+data "ibm_is_instance" "{{ backend.name | replace("-", "_") }}_{{server.name | replace("-", "_") }}" {
+  name = "{{ server.name }}"
+
+  depends_on = [ibm_is_instance.{{server.name | replace("-", "_") }}]
+}
+
+resource "ibm_is_lb_pool_member" "{{ backend.name | replace("-", "_") }}_{{ server.name | replace("-", "_") }}" {
+  lb        = ibm_is_lb.{{generator.attributes.name | replace("-", "_") }}.id
+  pool      = ibm_is_lb_pool.{{backend.name | replace("-", "_") }}.id
+  port      = "{{ server.port }}"
+  target_id = data.ibm_is_instance.{{ backend.name | replace("-", "_") }}_{{server.name | replace("-", "_") }}.id
+}
+
+{% endfor %}
+{% endfor %}
+
+{% for frontend in generator.attributes.frontends %}
+
+resource "ibm_is_lb_listener" "listener_{{loop.index}}" {
+  lb        = ibm_is_lb.{{generator.attributes.name | replace("-", "_") }}.id
+  protocol  = "tcp"
+  port_min  = "{{ frontend.port }}"
+  port_max  = "{{ frontend.port }}"
+  default_pool = ibm_is_lb_pool.{{frontend.backend | replace("-", "_") }}.id
+}
+
+{% endfor %}
