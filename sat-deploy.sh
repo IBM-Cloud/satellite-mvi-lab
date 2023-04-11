@@ -712,7 +712,14 @@ if ! $INSIDE_CONTAINER;then
       echo "${CURRENT_CONTAINER_ID}" > ${STATUS_DIR}/pid/container.id
     fi
     run_env_logs
-    PODMAN_EXIT_CODE=$(${CONTAINER_ENGINE} inspect ${CURRENT_CONTAINER_ID} --format='{{.State.ExitCode}}')
+    sleep 3
+    ${CONTAINER_ENGINE} container exists ${CURRENT_CONTAINER_ID}
+    CONTAINER_STILL_RUNNING=$?
+    if [ $CONTAINER_STILL_RUNNING -eq 0 ];then
+      PODMAN_EXIT_CODE=$(${CONTAINER_ENGINE} inspect ${CURRENT_CONTAINER_ID} --format='{{.State.ExitCode}}')
+    else
+      PODMAN_EXIT_CODE=0
+    fi
   else
     eval $run_cmd
     PODMAN_EXIT_CODE=$?
