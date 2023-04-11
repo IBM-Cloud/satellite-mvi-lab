@@ -13,7 +13,7 @@ RUN yum install -y yum-utils python39 python39-pip && \
     yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
     yum install -y tar sudo unzip wget jq skopeo httpd-tools git && \
     pip3 install --upgrade pip && \
-    pip3 install jmespath pyyaml argparse python-benedict pyvmomi && \
+    pip3 install jmespath pyyaml argparse python-benedict pyvmomi openshift && \
     alternatives --set python /usr/bin/python3 && \
     yum install -y vault && \
     yum clean all
