@@ -26,6 +26,17 @@ else
   echo "Warning: OpenShift client not found under $STATUS_DIR/downloads, oc command will not be available."
 fi
 
+ibm_cloud=$(find $STATUS_DIR/downloads/ -name "ibmcloud-linux*" | tail -1)
+if [ "$ibm_cloud" != "" ];then
+  echo "Installing ibmcloud cli"
+  $ibm_cloud
+  ibmcloud plugin install kubernetes-service -f
+  ibmcloud plugin install container-registry -f
+  ibmcloud plugin install is -f
+else
+  echo "Warning: ibmcloud cli not found under $STATUS_DIR/downloads, ibmcloud command will not be available."
+fi
+
 /bin/bash
 
 exit 0
