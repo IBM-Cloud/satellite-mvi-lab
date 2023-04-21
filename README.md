@@ -1,8 +1,6 @@
 # Satellite Deployer
 
-## usage
-
-#### prereqs
+## prereqs
 - podman installed
 - on MacOS make sure to have mounted home folders, i.e.
 ```
@@ -11,7 +9,7 @@ podman machine init --cpus=4 --memory=4096 -v $HOME:$HOME
 - publicly accessable qcow image to RHCOS. e.g. cos://eu-de/images-mvi-on-sat/rhcos-4.10.37-x86_64-ibmcloud.x86_64.qcow2
 - resource group should exist
 
-### prepare
+## prepare
 - make sure podman is installed
 - build the container:
 ```
@@ -26,7 +24,7 @@ podman machine init --cpus=4 --memory=4096 -v $HOME:$HOME
 - update resource_group in data/config/sample/config/sat-ibm-cloud-roks.yaml
 - update href for custom_image in data/config/sample/config/sat-ibm-cloud-roks.yaml
 
-### create artifacts
+## create satellite + OpenShift cluster
 
 ```
 export STATUS_DIR=$(pwd)/data/status/sample
@@ -38,8 +36,21 @@ export IBM_CLOUD_API_KEY=*****
 
 When finished import wireguard tunnel from data/downloads/client.conf
 
+## configure ODF
 
-### destroy artifacts
+## activate OpenShift registry
+
+## install Maximo core
+
+## add a GPU node to the environment
+
+## install MVI
+
+## expose MAS to the internet
+
+## load demo model and conect MVI mobile
+
+## destroy artifacts
 
 ```
 export STATUS_DIR=$(pwd)/data/status/sample
