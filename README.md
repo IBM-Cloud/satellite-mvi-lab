@@ -194,3 +194,14 @@ export IBM_CLOUD_API_KEY=*****
 
 ./sat-deploy.sh env destroy -e env_id=<some name> --confirm-destroy
 ```
+
+Remove the leftover Satellite storage association for ODF.
+```bash
+export SAT_ASSIGN_UUID=$(ibmcloud sat storage assignment ls --output json | jq -r --arg assoc "${ENV_ID}-assignment" '.[]  | select(.name == $assoc) | .uuid')
+ibmcloud sat storage assignment rm -f --assignment $SAT_ASSIGN_UUID
+```
+Remove the leftover Satellite storage template for ODF.
+```bash
+export SAT_STORAGE_UUID=$(ibmcloud sat storage config ls --output json | jq -r --arg config "odf-local-${ENV_ID}" | jq -r --arg config "odf-local-${ENV_ID}" '.[]  | select(."config-name" == $config) | .uuid')
+ibmcloud sat storage config rm -f --config $SAT_STORAGE_UUID
+```
