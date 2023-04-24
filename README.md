@@ -1,6 +1,6 @@
-# Satellite Deployer
+# MVI on Satellite Deployer
 
-## prereqs
+## Prereqs
 - podman installed
 - on MacOS make sure to have mounted home folders, i.e.
 ```bash
@@ -11,7 +11,7 @@ podman machine init --cpus=4 --memory=4096 -v $HOME:$HOME
 
 - [prepare ibm cloud account](prerequisites.md)
 
-## prepare
+## Prepare
 - make sure podman is installed
 - build the container:
 ```bash
@@ -26,7 +26,7 @@ podman machine init --cpus=4 --memory=4096 -v $HOME:$HOME
 - update resource_group in data/config/sample/config/sat-ibm-cloud-roks.yaml
 - update href for custom_image in data/config/sample/config/sat-ibm-cloud-roks.yaml
 
-## create satellite + OpenShift cluster
+## Create satellite + OpenShift cluster
 
 ```bash
 export STATUS_DIR=$(pwd)/data/status/sample
@@ -45,7 +45,7 @@ data/status/sample/downloads/client.conf
 
 Wait until OpenShift has become ready. Currently Ansible exits before this.
 
-## configure OpenShift Data Foundation(ODF)
+## Configure OpenShift Data Foundation(ODF)
 
 ### TODO: write an Ansible playbook for this task
 
@@ -88,7 +88,7 @@ Wait for status gats into ready state. Ignore intermediate errors of this state.
   "storageClusterStatus": "Ready"
 }
 
-## activate OpenShift registry
+## Activate OpenShift registry
 Run the following commmand to create a PVC in OpenShift for the OpenShift Registray and activate the Registry Operator
 ```bash
 oc create -f - <<EOF
@@ -116,7 +116,7 @@ oc patch configs.imageregistry.operator.openshift.io/cluster \
 ```
 Exit container.
 
-## add a GPU node to the environment
+## Add a GPU node to the environment
 
 Edit configuration file data/config/sample/config/sat-ibm-cloud-roks.yaml and uncomment gpu node in section sat_host.
 Stay in the same shell as before, then requirement variables are still set. Execute the following apply command. Note
@@ -126,7 +126,7 @@ that due to limited capacity of GPU instances this command may fail. If it fails
 ./sat-deploy.sh env apply -e env_id="${ENV_ID}" -v --confirm-destroy
 ```
 
-### deploy the Nvidia pgu operator
+### Deploy the Nvidia pgu operator
 
 Start a shell in the deployment container:
 ```bash
@@ -139,6 +139,7 @@ ibmcloud login --apikey $IBM_CLOUD_API_KEY
 ibmcloud target -g <YOUR_RESOURCE_GROUP> -r <YOUR_REGION>
 ibmcloud oc clusters
 ibmcloud oc cluster config --admin -c "${ENV_ID}-sat-roks"
+
 ```
 
 ```bash
@@ -146,9 +147,9 @@ ROLE_NAME=nvidia_gpu ansible-playbook ibm.mas_devops.run_role
 ```
 
 Note: Due to a bug the last task won't succeed:  "Wait for Cluster Policy instance to be ready"
-You can terminate it by pressing ctrl c
+You can terminate it by pressing \<ctrl>\<c>
 
-### fix failing install og gpu operator
+### Fix failing install og gpu operator
 Due to this bug the gpu operator fails to install: https://github.com/NVIDIA/gpu-operator/issues/428
 
 To fix this we need to create a new tag using this template:
@@ -157,7 +158,7 @@ To fix this we need to create a new tag using this template:
 oc -n openshift tag <copy from release.txt> driver-toolkit:<get from pod name>
 ```
 
-In the OpenShift console go to workloads -> pods and filter namespace nvidia-gpu-operator. Loo for pod named
+In the OpenShift console go to workloads -> pods and filter namespace nvidia-gpu-operator. Look for pod named
 nvidia-driver-daemonset-xxx-. Example:
 nvidia-driver-daemonset-410.84.202303181059-0-mcg6m
 We need the middle part, in this example: 410.84.202303181059-0, so the tag to be created will be
@@ -166,33 +167,118 @@ driver-toolkit:410.84.202303181059-0
 The image name and hash can be found in realease.txt of OCP clients:
 https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.10.55/release.txt
 
-Check that machione os version (approximately line 20) matches our tag. If this is not the case, go to an earlier
+Check that machine os version (approximately line 20) matches our tag. If this is not the case, go to an earlier
 or later version, i.e. https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.10.56/release.txt
 Find image for driver-toolkit, i.e. 
 quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:51e2043014581f30f456f54aacd983b6736b3a7d83c171ed7e0f78d3c13b550e
 
-Complete the command, i.e.
+- Complete the command, i.e.
 ```
 oc -n openshift tag quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:51e2043014581f30f456f54aacd983b6736b3a7d83c171ed7e0f78d3c13b550e driver-toolkit:410.84.202303181059-0
 ```
-Exeute the command. Then delete the pod nvidia-driver-daemonset-xxx-. It will get recreated and the driver will install.
+- Exeute the command. Then delete the pod nvidia-driver-daemonset-xxx-. It will get recreated and the driver will install.
 
-## install Maximo core
+## Install Maximo core
 
-## install MVI
+- Copy Maximo configuration files:
 
-## expose MAS to the internet
-
-## load demo model and conect MVI mobile
-
-## destroy artifacts
+```bash
+  mkdir -p data/status/sample/mvi
+  cp -r ./sample-configurations/mvi/* data/status/sample/mvi
 
 ```
-export STATUS_DIR=$(pwd)/data/status/sample
-export CONFIG_DIR=$(pwd)/data/config/sample
-export IBM_CLOUD_API_KEY=*****
+- Edit and complete data/status/sample/mvi/masEnv.sh 
+Look for all parametes in brackets \<param>
 
-./sat-deploy.sh env destroy -e env_id=<some name> --confirm-destroy
+- Run the automation playbook. cmd container should be still running. If not start again and login to OpenShift.
+
+```bash
+source /data/status/mvi/masEnv.sh
+ansible-playbook ibm.mas_devops.oneclick_core
+
+```
+
+- Take a note of the superuser name and password displayed at the end of the playbook.
+
+## Install MVI
+
+```bash
+source /data/status/mvi/masEnv.sh
+ansible-playbook ibm.mas_devops.oneclick_add_visualinspection
+
+```
+
+Currently MVI does not support ODF but a fix is on the way. In the meantime we use this workaround:
+
+```bash
+oc edit scc ibm-mas-visualinspection-scc
+```
+
+Look for seLinuxContext and change type from "RunAsAny" to "MustRunAs"
+Trigger recreation of MVI pods
+
+```bash
+oc project mas-inst1-visualinspection
+oc delete pod --all
+
+```
+
+## Login as superuser and create admin user
+
+- Login to the UI as superuser
+- Create admin user
+- Assign application and administration entitlements -> Premium
+- Verify that MVI access is to to Administrator
+
+## Expose MAS to the internet
+
+- Edit configuration file data/config/sample/config/sat-ibm-cloud-roks.yaml and uncomment the loadbalancer.
+- Run the following command:
+
+```bash
+./sat-deploy.sh env apply -e env_id="${ENV_ID}" -v
+```
+
+### TODO move to Ansible role
+Start a shell in the deployment container:
+```bash
+./sat-deploy.sh env cmd -e ENV_ID="${ENV_ID}"
+```
+You should have an command prompt inside the docker container, which contains all CLIs like ibmcloud and oc.
+Connect to your Cloud Account and Openshift cluster:
+```bash
+ibmcloud login --apikey $IBM_CLOUD_API_KEY
+ibmcloud target -g <YOUR_RESOURCE_GROUP> -r <YOUR_REGION>
+```
+
+Remove all IPs from the subdomain.
+Take a note of the IP addresses
+```bash
+ibmcloud oc nlb-dns ls -c $ENV_ID-sat-roks
+```
+
+Remove IP one by one
+```bash
+ibmcloud oc nlb-dns rm vpc-gen2 -c $ENV_ID-sat-roks --nlb-subdomain $MVI_SUBDOMAIN --ip <ip address>
+```
+
+Add IP address of loadbalancer
+```bash
+export MVI_SUBDOMAIN=$(ibmcloud oc nlb-dns ls -c $ENV_ID-sat-roks --output json -q | jq -r '.[] | .nlbHost')
+echo $MVI_SUBDOMAIN
+export PUBLIC_IP=$(ibmcloud is lb rh-mvi5-nlb --output json -q | jq '.public_ips[] | .address' | tr -d '"')
+echo $PUBLIC_IP
+ibmcloud oc nlb-dns add -c $ENV_ID-sat-roks --ip $PUBLIC_IP --nlb-host $MVI_SUBDOMAIN -q
+
+```
+
+## Load demo model and conect MVI mobile
+
+## Destroy artifacts
+
+Start a shell in the deployment container:
+```bash
+./sat-deploy.sh env cmd -e ENV_ID="${ENV_ID}"
 ```
 
 Remove the leftover Satellite storage association for ODF.
@@ -200,8 +286,15 @@ Remove the leftover Satellite storage association for ODF.
 export SAT_ASSIGN_UUID=$(ibmcloud sat storage assignment ls --output json | jq -r --arg assoc "${ENV_ID}-assignment" '.[]  | select(.name == $assoc) | .uuid')
 ibmcloud sat storage assignment rm -f --assignment $SAT_ASSIGN_UUID
 ```
+
 Remove the leftover Satellite storage template for ODF.
 ```bash
 export SAT_STORAGE_UUID=$(ibmcloud sat storage config ls --output json | jq -r --arg config "odf-local-${ENV_ID}" | jq -r --arg config "odf-local-${ENV_ID}" '.[]  | select(."config-name" == $config) | .uuid')
 ibmcloud sat storage config rm -f --config $SAT_STORAGE_UUID
+```
+
+Exit container and run the following command to cleanup:
+
+```bash
+./sat-deploy.sh env destroy -e env_id="${ENV_ID}" --confirm-destroy
 ```

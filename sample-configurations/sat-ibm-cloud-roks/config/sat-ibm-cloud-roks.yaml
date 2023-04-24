@@ -158,23 +158,17 @@ sat_host:
 #       port: 80
 #     - name : {{ env_id }}-worker2
 #       port: 80
-#     - name : {{ env_id }}-worker3
-#       port: 80
 #   - name: pool2
 #     servers:
 #     - name : {{ env_id }}-worker1
 #       port: 443
 #     - name : {{ env_id }}-worker2
 #       port: 443
-#     - name : {{ env_id }}-worker3
-#       port: 443
 #   - name: pool3
 #     servers:
 #     - name : {{ env_id }}-worker1
 #       port: 1936
 #     - name : {{ env_id }}-worker2
-#       port: 1936
-#     - name : {{ env_id }}-worker3
 #       port: 1936
 #   frontends:
 #   - port: 80
