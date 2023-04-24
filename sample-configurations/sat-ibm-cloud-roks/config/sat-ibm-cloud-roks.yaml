@@ -138,40 +138,49 @@ sat_host:
     bastion_host: {{ env_id }}-bastion
     keys:
     - "{{ env_id }}-provision"
+# - name: {{ env_id }}-worker4
+#   flavour: gpu
+#   sat_zone_idx: 2
+#   infrastructure:
+#     image: {{ env_id }}-rhcos410
+#     subnet: {{ env_id }}-subnet-zone-2
+#     bastion_host: {{ env_id }}-bastion
+#     keys:
+#     - "{{ env_id }}-provision"
 
-loadbalancer:
-- name: {{ env_id }}-nlb
-  subnet: {{ env_id }}-subnet-zone-1
-  backends:
-  - name: pool1
-    servers:
-    - name : {{ env_id }}-worker1
-      port: 80
-    - name : {{ env_id }}-worker2
-      port: 80
-    - name : {{ env_id }}-worker3
-      port: 80
-  - name: pool2
-    servers:
-    - name : {{ env_id }}-worker1
-      port: 443
-    - name : {{ env_id }}-worker2
-      port: 443
-    - name : {{ env_id }}-worker3
-      port: 443
-  - name: pool3
-    servers:
-    - name : {{ env_id }}-worker1
-      port: 1936
-    - name : {{ env_id }}-worker2
-      port: 1936
-    - name : {{ env_id }}-worker3
-      port: 1936
-  frontends:
-  - port: 80
-    backend: pool1
-  - port: 443
-    backend: pool2
-  - port: 1936
-    backend: pool3
+# loadbalancer:
+# - name: {{ env_id }}-nlb
+#   subnet: {{ env_id }}-subnet-zone-1
+#   backends:
+#   - name: pool1
+#     servers:
+#     - name : {{ env_id }}-worker1
+#       port: 80
+#     - name : {{ env_id }}-worker2
+#       port: 80
+#     - name : {{ env_id }}-worker3
+#       port: 80
+#   - name: pool2
+#     servers:
+#     - name : {{ env_id }}-worker1
+#       port: 443
+#     - name : {{ env_id }}-worker2
+#       port: 443
+#     - name : {{ env_id }}-worker3
+#       port: 443
+#   - name: pool3
+#     servers:
+#     - name : {{ env_id }}-worker1
+#       port: 1936
+#     - name : {{ env_id }}-worker2
+#       port: 1936
+#     - name : {{ env_id }}-worker3
+#       port: 1936
+#   frontends:
+#   - port: 80
+#     backend: pool1
+#   - port: 443
+#     backend: pool2
+#   - port: 1936
+#     backend: pool3
     

@@ -1,25 +1,31 @@
 ---
-- set_fact:
-    _odf_volume_name: "{{ hostvars[roks_host]['sat_host']['name']}}-data2"
+- name: attach volume if present
+  block:
+  - set_fact:
+      _odf_volume_name: "{{ hostvars[roks_host]['sat_host']['name']}}-data2"
 
-- set_fact:
-    _odf_id: "{{ tfstate.resources | json_query(query) | first }}"
-  vars:
-    query: >-
-      [?type=='ibm_is_volume' && instances[0].attributes.name=='{{_odf_volume_name}}'].
-      {volume_id: instances[0].attributes.id, volume_name: instances[0].attributes.name}
+  - set_fact:
+      _odf_id: "{{ tfstate.resources | json_query(query) | first }}"
+    vars:
+      query: >-
+        [?type=='ibm_is_volume' && instances[0].attributes.name=='{{_odf_volume_name}}'].
+        {volume_id: instances[0].attributes.id, volume_name: instances[0].attributes.name}
 
-- name: get status
-  command: ibmcloud is vol {{ _odf_id.volume_id }} --output json -q
-  register: output
+  - name: get status
+    command: ibmcloud is vol {{ _odf_id.volume_id }} --output json -q
+    register: output
 
-- name: parse status
-  set_fact:
-    _status: "{{output.stdout | from_json | json_query('attachment_state')}}"
+  - name: parse status
+    set_fact:
+      _status: "{{output.stdout | from_json | json_query('attachment_state')}}"
 
-- debug:
-    var: _status
+  - debug:
+      var: _status
 
-- name: attach volume
-  command: ibmcloud is in-vola odf-vol {{ hostvars[roks_host]['sat_host']['name'] }} {{ _odf_id.volume_id }}
-  when: _status == "unattached"
+  - name: attach volume
+    command: ibmcloud is in-vola odf-vol {{ hostvars[roks_host]['sat_host']['name'] }} {{ _odf_id.volume_id }}
+    when: _status == "unattached"
+
+  rescue:
+    - debug:
+        msg: no volume to attach

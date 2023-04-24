@@ -35,3 +35,10 @@ sat_host:
     storage_profile: 5iops-tier
     volume_size_gb: 100
     volume2_size_gb: 500
+- flavour: gpu
+  type: worker
+  infrastructure:
+    type: vpc
+    profile: "gx2-8x64x1v100"
+    storage_profile: 5iops-tier
+    volume_size_gb: 100
