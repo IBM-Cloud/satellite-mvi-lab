@@ -155,14 +155,14 @@ Due to this bug the gpu operator fails to install: https://github.com/NVIDIA/gpu
 To fix this we need to create a new tag using this template:
 
 ```
-oc -n openshift tag <copy from release.txt> driver-toolkit:<get from pod name>
+oc -n openshift tag <copy from release.txt> driver-toolkit:<coreos machine version>
 ```
 
-In the OpenShift console go to workloads -> pods and filter namespace nvidia-gpu-operator. Look for pod named
-nvidia-driver-daemonset-xxx-. Example:
-nvidia-driver-daemonset-410.84.202303181059-0-mcg6m
-We need the middle part, in this example: 410.84.202303181059-0, so the tag to be created will be
-driver-toolkit:410.84.202303181059-0
+Get the tag (machine version) with the following command
+```bash
+oc get nodes -o json | jq -r '.items[0].metadata.labels."feature.node.kubernetes.io/system-os_release.OSTREE_VERSION"'
+```
+
 
 The image name and hash can be found in realease.txt of OCP clients:
 https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.10.55/release.txt
@@ -177,6 +177,23 @@ quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:51e2043014581f30f456f54aac
 oc -n openshift tag quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:51e2043014581f30f456f54aacd983b6736b3a7d83c171ed7e0f78d3c13b550e driver-toolkit:410.84.202303181059-0
 ```
 - Exeute the command. Then delete the pod nvidia-driver-daemonset-xxx-. It will get recreated and the driver will install.
+- Verify that all pods are running:
+```
+[35] root@Satellite Deployer:/ # oc get pod -n nvidia-gpu-operator
+NAME                                                  READY   STATUS      RESTARTS   AGE
+gpu-feature-discovery-c7vmv                           1/1     Running     0          5h15m
+gpu-operator-6bc8c5bcf6-rjwq8                         1/1     Running     0          5h37m
+nvidia-container-toolkit-daemonset-pdcw5              1/1     Running     0          5h15m
+nvidia-cuda-validator-kgpkj                           0/1     Completed   0          5h11m
+nvidia-dcgm-exporter-ggzcr                            1/1     Running     0          5h15m
+nvidia-dcgm-ns7j9                                     1/1     Running     0          5h15m
+nvidia-device-plugin-daemonset-dmwm4                  1/1     Running     0          5h15m
+nvidia-device-plugin-validator-4h2nl                  0/1     Completed   0          5h10m
+nvidia-driver-daemonset-410.84.202303181059-0-mcg6m   2/2     Running     0          5h16m
+nvidia-node-status-exporter-hxs2n                     1/1     Running     0          5h36m
+nvidia-operator-validator-b59gb                       1/1     Running     0          5h15m
+```
+
 
 ## Install Maximo core
 
@@ -214,7 +231,7 @@ Currently MVI does not support ODF but a fix is on the way. In the meantime we u
 oc edit scc ibm-mas-visualinspection-scc
 ```
 
-Look for seLinuxContext and change type from "RunAsAny" to "MustRunAs"
+Look for seLinuxContext and change type from "RunAsAny" to "MustRunAs". 
 Trigger recreation of MVI pods
 
 ```bash
@@ -274,6 +291,8 @@ ibmcloud oc nlb-dns add -c $ENV_ID-sat-roks --ip $PUBLIC_IP --nlb-host $MVI_SUBD
 
 ## Load demo model and conect MVI mobile
 
+
+
 ## Destroy artifacts
 
 Start a shell in the deployment container:
@@ -281,16 +300,18 @@ Start a shell in the deployment container:
 ./sat-deploy.sh env cmd -e ENV_ID="${ENV_ID}"
 ```
 
-Remove the leftover Satellite storage association for ODF.
+Login to IBM Cloud.
 ```bash
-export SAT_ASSIGN_UUID=$(ibmcloud sat storage assignment ls --output json | jq -r --arg assoc "${ENV_ID}-assignment" '.[]  | select(.name == $assoc) | .uuid')
-ibmcloud sat storage assignment rm -f --assignment $SAT_ASSIGN_UUID
+ibmcloud login --apikey $IBM_CLOUD_API_KEY
 ```
 
-Remove the leftover Satellite storage template for ODF.
+Remove Satellite storage association and template for ODF.
 ```bash
-export SAT_STORAGE_UUID=$(ibmcloud sat storage config ls --output json | jq -r --arg config "odf-local-${ENV_ID}" | jq -r --arg config "odf-local-${ENV_ID}" '.[]  | select(."config-name" == $config) | .uuid')
-ibmcloud sat storage config rm -f --config $SAT_STORAGE_UUID
+export SAT_AUUID=$(ibmcloud sat storage assignment ls --output json | jq -r --arg assoc "${ENV_ID}-assignment" '.[]  | select(.name == $assoc) | .uuid')
+ibmcloud sat storage assignment rm -f --assignment $SAT_AUUID
+export SAT_SUUID=$(ibmcloud sat storage config ls --output json | jq -r --arg config "odf-local-${ENV_ID}" '.[] | select(."config-name" == $config) | .uuid')
+ibmcloud sat storage config rm -f --config $SAT_SUUID
+
 ```
 
 Exit container and run the following command to cleanup:
