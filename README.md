@@ -3,11 +3,13 @@
 ## prereqs
 - podman installed
 - on MacOS make sure to have mounted home folders, i.e.
-```
-podman machine init --cpus=4 --memory=4096 -v $HOME:$HOME
 ```bash
+podman machine init --cpus=4 --memory=4096 -v $HOME:$HOME
+```
 - publicly accessable qcow image to RHCOS. e.g. cos://eu-de/images-mvi-on-sat/rhcos-4.10.37-x86_64-ibmcloud.x86_64.qcow2
 - resource group should exist
+
+- [prepare ibm cloud account](prerequisites.md)
 
 ## prepare
 - make sure podman is installed
@@ -30,20 +32,22 @@ podman machine init --cpus=4 --memory=4096 -v $HOME:$HOME
 export STATUS_DIR=$(pwd)/data/status/sample
 export CONFIG_DIR=$(pwd)/data/config/sample
 export IBM_CLOUD_API_KEY=*****
+export IBM_ODF_API_KEY=*****
+export ENV_ID=xy-mvi5
 
-./sat-deploy.sh env apply -e env_id=<some name> -v
+./sat-deploy.sh env apply -e env_id="${ENV_ID}" -v
 ```
 
-When finished import wireguard tunnel from data/downloads/client.conf
-
-## configure OpenShift Data Foundation(ODF)
 Connect to the private network of your Satellite Location using the wireguard configuration file found in:
 ```code
 data/status/sample/downloads/client.conf
-``` 
+```
+
+## configure OpenShift Data Foundation(ODF)
+
 Start a shell in the deployment container:
 ```bash
-./sat-deploy.sh env cmd --sat-develop
+./sat-deploy.sh env cmd -e ENV_ID="${ENV_ID}" -e IBM_ODF_API_KEY="${IBM_ODF_API_KEY}"
 ```
 You should have an command prompt inside the docker container, which contains all CLIs like ibmcloud and oc.
 Connect to your Cloud Account and Openshift cluster:
@@ -60,8 +64,6 @@ oc get nodes
 ```
 The following commands will create a satellite storage template and assign it to our cluster. Please use the IBM Cloud API key from the prerequistes designated for the Open Shift Data Foundation deployment. We deploy ODF on all nodes which have a disk id of /dev/vde.
 ```bash
-#export your ODF API KEY
-export IBM_ODF_API_KEY="xxxx"
 # find you sat location id
 export SAT_LOCATION_ID=$(ibmcloud sat location ls --output json | jq -r --arg satloc "${ENV_ID}-sat" '.[]  | select(.name == $satloc) | .id')
 # echo sat location id 
@@ -70,7 +72,7 @@ echo $SAT_LOCATION_ID
 ibmcloud sat storage config create --name "odf-local-${ENV_ID}" --template-name odf-local --template-version 4.10 \
 --location "${SAT_LOCATION_ID}" -p "auto-discover-devices=false" -p "iam-api-key=${IBM_ODF_API_KEY}" \
  -p "osd-device-path=/dev/vde" -p "ignore-noobaa=true"
-#get cluster id
+# get cluster id
 export $SAT_ROKS_CLUSTER_ID=$(ibmcloud oc cluster get -c "${ENV_ID}-sat-roks" --output json | jq -r .id)
 echo $SAT_ROKS_CLUSTER_ID
 # create storage assignment
@@ -79,10 +81,12 @@ ibmcloud sat storage assignment create --name "${ENV_ID}-assignment" -c "${SAT_R
 Wait 5-10 minutes and watch the output of until it is ready
 ```bash
 oc get ocscluster -o json | jq .items[].status
+```
+
 {
   "storageClusterStatus": "Ready"
 }
-```
+
 ## activate OpenShift registry
 Run the following commmand to create a PVC in OpenShift for the OpenShift Registray and activate the Registry Operator
 ```bash
