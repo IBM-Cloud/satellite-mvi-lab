@@ -9,6 +9,8 @@ resource "ibm_is_lb" "{{generator.attributes.name | replace("-", "_") }}" {
   name     = "{{ generator.attributes.name }}"
   subnets = [data.ibm_is_subnet.{{ generator.attributes.subnet | replace("-", "_") }}.id]
   profile = "network-fixed"
+
+  depends_on = [ibm_is_subnet.{{ generator.attributes.subnet | replace("-", "_") }}]
 }
 
 {% for backend in generator.attributes.backends %}
