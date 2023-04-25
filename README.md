@@ -1,6 +1,6 @@
 # MVI on Satellite Deployer
 
-## Prereqs
+## 1 Prereqs
 - podman installed
 - on MacOS make sure to have mounted home folders, i.e.
 ```bash
@@ -11,7 +11,7 @@ podman machine init --cpus=4 --memory=4096 -v $HOME:$HOME
 
 - [prepare ibm cloud account](prerequisites.md)
 
-## Prepare
+## 2 Prepare
 - make sure podman is installed
 - build the container:
 ```bash
@@ -28,7 +28,7 @@ podman machine init --cpus=4 --memory=4096 -v $HOME:$HOME
 - update ibm_cloud_region in data/config/sample/inventory/sample.inv
 - update ibm_cloud_location (for satellite) in data/config/sample/inventory/sample.inv
 
-## Create satellite + OpenShift cluster
+## 3 Create satellite + OpenShift cluster
 
 ```bash
 export STATUS_DIR=$(pwd)/data/status/sample
@@ -47,7 +47,7 @@ data/status/sample/downloads/client.conf
 
 Wait until OpenShift has become ready. Currently Ansible exits before this.
 
-## Configure OpenShift Data Foundation(ODF)
+## 4 Configure OpenShift Data Foundation(ODF)
 
 ### TODO: write an Ansible playbook for this task
 
@@ -89,7 +89,7 @@ Wait for status gats into ready state. Ignore intermediate errors of this state.
   "storageClusterStatus": "Ready"
 }
 
-## Activate OpenShift registry
+## 5 Activate OpenShift registry
 Run the following commmand to create a PVC in OpenShift for the OpenShift Registray and activate the Registry Operator
 ```bash
 oc create -f - <<EOF
@@ -117,7 +117,7 @@ oc patch configs.imageregistry.operator.openshift.io/cluster \
 ```
 Exit container.
 
-## Add a GPU node to the environment
+## 6 Add a GPU node to the environment
 
 Edit configuration file data/config/sample/config/sat-ibm-cloud-roks.yaml and uncomment gpu node in section sat_host.
 Stay in the same shell as before, then requirement variables are still set. Execute the following apply command. Note
@@ -221,7 +221,7 @@ nvidia-operator-validator-b59gb                       1/1     Running     0     
 ```
 
 
-## Install Maximo core
+## 7 Install Maximo core
 
 - Copy Maximo configuration files:
 
@@ -243,7 +243,7 @@ ansible-playbook ibm.mas_devops.oneclick_core
 
 - Take a note of the superuser name and password displayed at the end of the playbook.
 
-## Install MVI
+## 8 Install MVI
 
 ```bash
 source /data/status/mvi/masEnv.sh
@@ -266,14 +266,14 @@ oc delete pod --all
 
 ```
 
-## Login as superuser and create admin user
+## 9 Login as superuser and create admin user
 
 - Login to the UI as superuser
 - Create admin user
 - Assign application and administration entitlements -> Premium
 - Verify that MVI access is to to Administrator
 
-## Expose MAS to the internet
+## 10 Expose MAS to the internet
 
 - Edit configuration file data/config/sample/config/sat-ibm-cloud-roks.yaml and uncomment the loadbalancer.
 - Run the following command:
@@ -315,11 +315,11 @@ ibmcloud oc nlb-dns add -c $ENV_ID-sat-roks --ip $PUBLIC_IP --nlb-host $MVI_SUBD
 
 ```
 
-## Load demo model and conect MVI mobile
+## 11 Load demo model and conect MVI mobile
 
 
 
-## Destroy artifacts
+## 12 Destroy artifacts
 
 Start a shell in the deployment container:
 ```bash
