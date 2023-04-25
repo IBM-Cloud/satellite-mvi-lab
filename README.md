@@ -1,5 +1,8 @@
 # MVI on Satellite Deployer
 
+This project is based on IBM Cloud Pak Deployer https://github.com/IBM/cloud-pak-deployer  
+It was stripped down before satellite specific components weere added (still holds many unused artifacts). If time permits we intend to submit satellite components upstream. Credits to the developers of Cloud Pak Deployer.
+
 ## 1 Prereqs
 - podman installed
 - on MacOS make sure to have mounted home folders, i.e.
@@ -84,7 +87,7 @@ Wait 5-10 minutes and watch the output of until it is ready. Check the OpenShift
 oc get ocscluster -o json | jq .items[].status
 ```
 
-Wait for status gats into ready state. Ignore intermediate errors of this state.
+Wait for status gats into ready state. Ignore intermediate errors of this state.  
 {
   "storageClusterStatus": "Ready"
 }
