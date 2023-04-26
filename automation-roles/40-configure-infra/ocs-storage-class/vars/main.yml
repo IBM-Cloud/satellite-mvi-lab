@@ -1,4 +1,0 @@
----
-roks_ocs_base_storage_class_name: ibmc-vpc-block-metro-10iops-tier
-roks_ocs_base_mon_size: 20Gi
-roks_ocs_billing_type: advanced
