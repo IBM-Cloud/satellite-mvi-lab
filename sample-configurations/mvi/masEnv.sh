@@ -20,9 +20,9 @@ export MONGODB_CPU_REQUESTS=200m
 export MONGODB_REPLICAS=1
 
 export DNS_PROVIDER=cis
-export MAS_DOMAIN=<your custom domain>
+export MAS_DOMAIN=<your full maximo domain>
 export MAS_CLUSTER_ISSUER=inst1-cis-le-prod
-export CIS_SUBDOMAIN=maximo    # maximo domain will be maximo.<your custom domain>
+export CIS_SUBDOMAIN=maximo    # <your full maximo domain> will be <cis subdomain>.<your custom domain>
 export CIS_EMAIL=<your email>
 export CIS_APIKEY=<CIS api key>
 export CIS_CRN='<your cis crn>'  #keep the single quotes
