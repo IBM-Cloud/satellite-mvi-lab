@@ -285,39 +285,6 @@ oc delete pod --all
 ./sat-deploy.sh env apply -e env_id="${ENV_ID}" -v
 ```
 
-### TODO move to Ansible role
-Start a shell in the deployment container:
-```bash
-./sat-deploy.sh env cmd -e ENV_ID="${ENV_ID}"
-```
-You should have an command prompt inside the docker container, which contains all CLIs like ibmcloud and oc.
-Connect to your Cloud Account and Openshift cluster:
-```bash
-ibmcloud login --apikey $IBM_CLOUD_API_KEY
-ibmcloud target -g <YOUR_RESOURCE_GROUP> -r <YOUR_REGION>
-```
-
-Remove all IPs from the subdomain.
-Take a note of the IP addresses
-```bash
-ibmcloud oc nlb-dns ls -c $ENV_ID-sat-roks
-```
-
-Remove IP one by one
-```bash
-ibmcloud oc nlb-dns rm vpc-gen2 -c $ENV_ID-sat-roks --nlb-subdomain $MVI_SUBDOMAIN --ip <ip address>
-```
-
-Add IP address of loadbalancer
-```bash
-export MVI_SUBDOMAIN=$(ibmcloud oc nlb-dns ls -c $ENV_ID-sat-roks --output json -q | jq -r '.[] | .nlbHost')
-echo $MVI_SUBDOMAIN
-export PUBLIC_IP=$(ibmcloud is lb rh-mvi5-nlb --output json -q | jq '.public_ips[] | .address' | tr -d '"')
-echo $PUBLIC_IP
-ibmcloud oc nlb-dns add -c $ENV_ID-sat-roks --ip $PUBLIC_IP --nlb-host $MVI_SUBDOMAIN -q
-
-```
-
 ## 11 Load demo model and conect MVI mobile
 
 

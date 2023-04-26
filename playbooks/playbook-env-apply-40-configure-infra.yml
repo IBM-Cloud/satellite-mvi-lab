@@ -79,3 +79,17 @@
     vars:
       sat_hosts_cp: "{{groups['sat_hosts_master']}}"
       sat_hosts_worker: "{{groups['sat_hosts_worker']}}"
+
+- name: 40 - Configure infrastructure - Loadbalancer
+  hosts: localhost
+  connection: local
+  gather_facts: False
+
+  vars:
+    sat_hosts_worker: "{{groups['sat_hosts_worker']}}"
+
+  tasks:
+  - name: Configure loadbalancer
+    ansible.builtin.include_role:
+      name: satellite-configure-lb
+    when: all_config['loadbalancer'] is defined

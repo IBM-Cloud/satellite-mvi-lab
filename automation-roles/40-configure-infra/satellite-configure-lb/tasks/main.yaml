@@ -1,0 +1,36 @@
+---
+- name: get ROKS cluster subdomain
+  block:
+    - command: ibmcloud oc nlb-dns ls -c {{_cluster_id}} --output json -q
+      register: output
+
+    - set_fact:
+        _cluster_subdomain: "{{ output.stdout | from_json | json_query('[*].nlbHost') | first }}"
+
+    - debug:
+        var: _cluster_subdomain
+
+- name: output cluster domain
+  debug:
+    var: _cluster_subdomain
+
+- debug:
+    var: all_config.loadbalancer[0].name
+
+- name: get public ip of loadbalancer
+  set_fact:
+    _lb_public_ip: "{{ tfstate.resources | json_query(query) | first  }}"
+  vars:
+    query: >-
+      [?type=='ibm_is_lb' && instances[0].attributes.name=='{{all_config.loadbalancer[0].name}}'].instances[0].attributes.public_ips[0]
+
+- name: remove workers from dns
+  command: ibmcloud oc nlb-dns rm vpc-gen2 -c {{_cluster_id}} --nlb-subdomain {{_cluster_subdomain}} --ip {{_host}}
+  ignore_errors: true
+  vars:
+    _host: "{{item}}"
+  loop: "{{ sat_hosts_worker }}"
+  
+- name: add lb to dns
+  command: ibmcloud oc nlb-dns add -c {{ _cluster_id }} --ip {{ _lb_public_ip }} --nlb-host {{_cluster_subdomain}} -q
+  ignore_errors: true
