@@ -36,7 +36,7 @@
         query: "clusterSearch[?registration.name == '{{all_config.satellite[0].name}}-roks']"
 
     - set_fact:
-        _cluster_id: "{{(_cluster_id | first).clusterId}}"
+        _cluster_id: "{{(_cluster_id | first).registration.clusterId}}"
       when: _cluster_id | length > 0
 
 - name: create cluster
@@ -67,7 +67,7 @@
   set_fact:
     _cluster_id: "{{ output.stdout | from_json | json_query(query) | first }}"
   vars:
-    query: "clusterSearch[?registration.name == '{{all_config.satellite[0].name}}-roks'].clusterId"
+    query: "clusterSearch[?registration.name == '{{all_config.satellite[0].name}}-roks'].registration.clusterId"
 
 - name: assign zones to ROKS worker pool
   include_tasks: sat-assign-zones.yaml
