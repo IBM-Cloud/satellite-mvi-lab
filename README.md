@@ -3,6 +3,8 @@
 This project is based on IBM Cloud Pak Deployer https://github.com/IBM/cloud-pak-deployer  
 It was stripped down before satellite specific components weere added (still holds many unused artifacts). If time permits we intend to submit satellite components upstream. Credits to the developers of Cloud Pak Deployer.
 
+<p align="center"><img src="images/deployment.png" width="400" style="background-color: white"/></p>
+
 ## 1 Prereqs
 - podman installed
 - on MacOS make sure to have mounted home folders, i.e.
