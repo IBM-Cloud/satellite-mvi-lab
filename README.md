@@ -261,17 +261,25 @@ ansible-playbook ibm.mas_devops.oneclick_add_visualinspection
 Currently MVI does not support ODF but a fix is on the way. In the meantime we use this workaround:
 
 ```bash
-oc edit scc ibm-mas-visualinspection-scc
+oc patch scc ibm-mas-visualinspection-scc \
+    --type='json' \
+    --patch='[
+        {"op": "replace", "path": "/seLinuxContext/type", "value": "MustRunAs"}
+    ]'
 ```
 
-Look for seLinuxContext and change type from "RunAsAny" to "MustRunAs". 
 Trigger recreation of MVI pods
 
 ```bash
-oc project mas-inst1-visualinspection
-oc delete pod --all
-
+oc delete pod -n mas-inst1-visualinspection --all
 ```
+
+Wait until all pods have been recreated. The pvc task pod is expected to fail after the patch. The job did complete before the patch.
+
+```bash
+oc get pod -n mas-inst1-visualinspection
+```
+
 
 ## 9 Login as superuser and create admin user
 
