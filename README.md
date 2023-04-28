@@ -130,7 +130,7 @@ that due to limited capacity of GPU instances this command may fail. If it fails
 ./sat-deploy.sh env apply -e env_id="${ENV_ID}" -v --confirm-destroy
 ```
 
-### Deploy the Nvidia pgu operator
+### Deploy the Nvidia GPU operator
 
 Start a shell in the deployment container:
 ```bash
@@ -271,10 +271,15 @@ oc delete pod --all
 
 ## 9 Login as superuser and create admin user
 
-- Login to the UI as superuser
+- Using the superuser credentials that were created upon successful installation to login to MAS UI ```https://admin.maximo.<your-domain>.com```
+![](images/mas-login.png)
+- Go to ```Administration``` > ```Users``` to create a new admin user (15 AppPoints) and fill in the details for the user like name, email and password.
+
 - Create admin user
-- Assign application and administration entitlements -> Premium
-- Verify that MVI access is to to Administrator
+![](images/admin-identity.png)
+- Assign application and administration ```entitlements``` -> ```Premium```
+![](images/admin-entitlement.png)
+- Save the credentials, logout of the super user and login with the new admin user created to confirm access to the platform.
 
 ## 10 Expose MAS to the internet
 

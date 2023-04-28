@@ -28,3 +28,25 @@ As Account Owner create an IBM Cloud Resource Group in the account management, i
 ![](images/cis-service-id.png)
 * Create and save an API Key for that service ID, we need that key later to create automatically DNS entries during Maximo setup
 
+## Custom Domain Registration
+It's recommended to have a custom domain for the MAS deployment. In most cases, clients already own a domain and have a certificate authoriy in place. You may follow the steps in this section to set up your own domain provided by IBM Cloud. It might take up to 24 hours to have your domain configurations verified.<br>
+- To create a custom domain, first you will need to register a new domain with domain name registration service. From the menu on IBM Cloud console, go to Classic infrastructure > Services > Domain Registration.
+![](images/domain-register.png)
+
+- Enter the new domain name in the <b>Domain Name</b> field. Click the <b>Check Availability</b> button to check whether the domain name is available, then click continue to register the domain.
+![](images/new-domain.png)
+
+- Unlock the domain.
+![](images/unlock-domain.png)
+
+- From the catalog, search for “internet services” and create free trial or standard service. 
+![](images/cis-create.png)
+- Click on Add domain
+![](images/cis-overview.png)
+- Add your custom domain name.
+![](images/domain-name.png)
+- Keep note of the CRN and name servers.
+![](images/cis-instance.png)
+- Go back to the domain registration page and replace the name servers with the new ones and associate them to your custom domain.
+![](images/name-servers.png)
+- After you configure your registrar or DNS provider, it can take up to 24 hours for the changes to take effect. When it is verified that the specified name servers were configured correctly for your domain or subdomain, the domain's status changes from ```Pending``` to ```Active```.
