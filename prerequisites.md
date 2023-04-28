@@ -29,9 +29,8 @@ As Account Owner create an IBM Cloud Resource Group in the account management, i
 * Create and save an API Key for that service ID, we need that key later to create automatically DNS entries during Maximo setup
 
 ## Custom Domain Registration
-It's recommended to have your custom domain ready before you start with setting up your cluster since it might take up to 24 hours to have your domain configurations verified.<br>
-To create a custom domain, first you will need to register a new domain with domain name registration service.
-- From the menu on IBM Cloud console, go to Classic infrastructure > Services > Domain Registration.
+It's recommended to have a custom domain for the MAS deployment. In most cases, clients already own a domain and have a certificate authoriy in place. You may follow the steps in this section to set up your own domain provided by IBM Cloud. It might take up to 24 hours to have your domain configurations verified.<br>
+- To create a custom domain, first you will need to register a new domain with domain name registration service. From the menu on IBM Cloud console, go to Classic infrastructure > Services > Domain Registration.
 ![](images/domain-register.png)
 
 - Enter the new domain name in the <b>Domain Name</b> field. Click the <b>Check Availability</b> button to check whether the domain name is available, then click continue to register the domain.
