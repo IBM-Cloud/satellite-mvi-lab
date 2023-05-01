@@ -17,6 +17,16 @@
   debug:
     var: all_config
 
+- name: Retrieve Terraform tfstate from the vault
+  include_role: 
+    name: vault-get-secret
+  vars:
+    secret_name: "{{ environment_name }}-terraform-tfstate"
+    secret_group: "{{ environment_name }}"
+
+- set_fact:
+    tfstate: "{{ secret_value }}"
+
 - name: Configure Satellite servers IBM Cloud VPC - control plane
   include_tasks: ibmcloud-sat-host-vpc-prepare.yaml
   loop: "{{ all_config.sat_host | default([]) }}"
@@ -27,7 +37,7 @@
   when:
   - cloud_platform == 'ibm-cloud'
   - current_sat_host.infrastructure.type == 'vpc'
-  - current_sat_host.type == 'master'
+  - current_sat_host.service == 'controlplane'
 
 - name: Configure Satellite servers IBM Cloud VPC - workers
   include_tasks: ibmcloud-sat-host-vpc-prepare.yaml
@@ -35,11 +45,11 @@
   loop_control:
     loop_var: current_sat_host
   vars:
-    new_host_group: 'sat_hosts_worker'
+    new_host_group: 'sat_hosts_ocp'
   when:
   - cloud_platform == 'ibm-cloud'
   - current_sat_host.infrastructure.type == 'vpc'
-  - current_sat_host.type == 'worker'
+  - current_sat_host.service == 'openshift'
 
 - name: Validate satellite is defined
   assert:

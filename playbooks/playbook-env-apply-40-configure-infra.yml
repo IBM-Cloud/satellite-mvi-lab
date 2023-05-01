@@ -49,7 +49,7 @@
       name: sat-host-ibmcloud-vpc-install
     
 - name: 40 - Configure infrastructure - Satellite servers - worker
-  hosts: sat_hosts_worker
+  hosts: sat_hosts_ocp
   become: True
   gather_facts: False
 
@@ -78,7 +78,7 @@
       name: satellite-configure
     vars:
       sat_hosts_cp: "{{groups['sat_hosts_master']}}"
-      sat_hosts_worker: "{{groups['sat_hosts_worker']}}"
+      sat_hosts_ocp: "{{groups['sat_hosts_ocp']}}"
 
 - name: 40 - Configure infrastructure - Loadbalancer
   hosts: localhost
@@ -86,7 +86,7 @@
   gather_facts: False
 
   vars:
-    sat_hosts_worker: "{{groups['sat_hosts_worker']}}"
+    sat_hosts_ocp: "{{groups['sat_hosts_ocp']}}"
 
   tasks:
   - name: Configure loadbalancer

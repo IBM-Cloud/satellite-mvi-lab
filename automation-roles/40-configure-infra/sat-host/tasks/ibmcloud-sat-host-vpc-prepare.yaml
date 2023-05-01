@@ -4,16 +4,6 @@
     bastion_host: "{{ current_sat_host['infrastructure']['bastion_host'] }}"
     nfs_server_ssh_key: "{{ current_sat_host['infrastructure']['keys'][0] }}"
 
-- name: Retrieve Terraform tfstate from the vault
-  include_role: 
-    name: vault-get-secret
-  vars:
-    secret_name: "{{ environment_name }}-terraform-tfstate"
-    secret_group: "{{ environment_name }}"
-
-- set_fact:
-    tfstate: "{{ secret_value }}"
-
 # Retrieve the public IP address of the bastion, which will be used as a jump host
 - set_fact:
     bastion_fip: "{{ tfstate.resources | json_query(query) | first }}"

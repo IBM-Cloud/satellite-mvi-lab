@@ -29,7 +29,7 @@
   ignore_errors: true
   vars:
     _host: "{{item}}"
-  loop: "{{ sat_hosts_worker }}"
+  loop: "{{ sat_hosts_ocp }}"
   
 - name: add lb to dns
   command: ibmcloud oc nlb-dns add -c {{ _cluster_id }} --ip {{ _lb_public_ip }} --nlb-host {{_cluster_subdomain}} -q
