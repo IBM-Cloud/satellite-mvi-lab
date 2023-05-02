@@ -65,8 +65,7 @@ Start a shell in the deployment container:
 You should have an command prompt inside the docker container, which contains all CLIs like ibmcloud and oc.
 Connect to your Cloud Account and Openshift cluster:
 ```bash
-ibmcloud login --apikey $IBM_CLOUD_API_KEY
-ibmcloud target -g <YOUR_RESOURCE_GROUP> -r <YOUR_REGION>
+ibmcloud login --apikey $IBM_CLOUD_API_KEY --no-region
 ibmcloud oc cluster config --admin -c "${ENV_ID}-sat-roks"
 ```
 
@@ -127,9 +126,7 @@ Start a shell in the deployment container:
 You should have an command prompt inside the docker container, which contains all CLIs like ibmcloud and oc.
 Connect to your Cloud Account and Openshift cluster:
 ```bash
-ibmcloud login --apikey $IBM_CLOUD_API_KEY
-ibmcloud target -g <YOUR_RESOURCE_GROUP> -r <YOUR_REGION>
-ibmcloud oc clusters
+ibmcloud login --apikey $IBM_CLOUD_API_KEY --no-region
 ibmcloud oc cluster config --admin -c "${ENV_ID}-sat-roks"
 
 ```
