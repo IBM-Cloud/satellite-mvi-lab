@@ -1,4 +1,45 @@
 ---
+# delete storage assignmen
+- name: get storage assignment
+  block:
+  - name: get assignments
+    command: ibmcloud sat storage assignment ls --location {{ all_config.satellite[0].name }} --output json -q
+    register: output
+
+  - set_fact:
+      _storage_assignment_id: "{{ output.stdout | from_json | json_query(query) }}"
+    vars:
+      query: "[?name == '{{ env_id }}-assignment']"
+
+  - set_fact:
+      _storage_assignment_id: "{{ (_storage_assignment_id | first).uuid }}"
+    when: _storage_assignment_id | length > 0
+
+- name: delete storage assignment
+  command: ibmcloud sat storage assignment rm -f --assignment {{_storage_assignment_id }}
+  when: _storage_assignment_id != []
+
+# delete storate config
+- name: get storage config name
+  block:
+  - name: get configs
+    command: ibmcloud sat storage config ls --location {{ all_config.satellite[0].name }} --output json -q
+    register: output
+
+  - set_fact:
+      _storage_config_id: "{{ output.stdout | from_json | json_query(query) }}"
+    vars:
+      query: "[?location == '{{ all_config.satellite[0].name }}']"
+
+  - set_fact:
+      _storage_config_id: "{{ (_storage_config_id | first ).uuid }}"
+    when: _storage_config_id | length > 0
+
+- name: delete storage config
+  command: ibmcloud sat storage config rm -f --config {{ _storage_config_id }}
+  when: _storage_config_id != []
+
+# delete OpenShift cluster
 - name: get ROKS cluster id
   block:
     - name: get clusters

@@ -44,7 +44,7 @@ export IBM_CLOUD_API_KEY=*****
 export IBM_ODF_API_KEY=*****
 export ENV_ID=xy-mvi5  # update
 
-./sat-deploy.sh env apply -e env_id="${ENV_ID}" -v
+./sat-deploy.sh env apply -e env_id="${ENV_ID}" -e IBM_ODF_API_KEY="${IBM_ODF_API_KEY}" -v
 ```
 
 Connect to the private network of your Satellite Location using the wireguard configuration file found in:
@@ -60,7 +60,7 @@ Wait until OpenShift has become ready. Currently Ansible exits before this.
 
 Start a shell in the deployment container:
 ```bash
-./sat-deploy.sh env cmd -e ENV_ID="${ENV_ID}" -e IBM_ODF_API_KEY="${IBM_ODF_API_KEY}"
+./sat-deploy.sh env cmd -e ENV_ID="${ENV_ID}"
 ```
 You should have an command prompt inside the docker container, which contains all CLIs like ibmcloud and oc.
 Connect to your Cloud Account and Openshift cluster:
@@ -69,23 +69,7 @@ ibmcloud login --apikey $IBM_CLOUD_API_KEY
 ibmcloud target -g <YOUR_RESOURCE_GROUP> -r <YOUR_REGION>
 ibmcloud oc cluster config --admin -c "${ENV_ID}-sat-roks"
 ```
-Check that you could run command against your cluster using the oc command.
-```bash
-oc get projects
-oc get nodes
-```
-The following commands will create a satellite storage template and assign it to our cluster. Please use the IBM Cloud API key from the prerequistes designated for the Open Shift Data Foundation deployment. We deploy ODF on all nodes which have a disk id of /dev/vde.
-```bash
-export SAT_LOCATION_ID=$(ibmcloud sat location ls --output json | jq -r --arg satloc "${ENV_ID}-sat" '.[]  | select(.name == $satloc) | .id')
-echo $SAT_LOCATION_ID
-ibmcloud sat storage config create --name "odf-local-${ENV_ID}" --template-name odf-local --template-version 4.10 \
---location "${SAT_LOCATION_ID}" -p "auto-discover-devices=false" -p "iam-api-key=${IBM_ODF_API_KEY}" \
- -p "osd-device-path=/dev/vde" -p "ignore-noobaa=true"
-export SAT_ROKS_CLUSTER_ID=$(ibmcloud oc cluster get -c "${ENV_ID}-sat-roks" --output json | jq -r .id)
-echo $SAT_ROKS_CLUSTER_ID
-ibmcloud sat storage assignment create --name "${ENV_ID}-assignment" -c "${SAT_ROKS_CLUSTER_ID}" --config "odf-local-${ENV_ID}"
 
-```
 Wait 5-10 minutes and watch the output of until it is ready. Check the OpenShift UI for what is going on: operators, pods, etc.
 ```bash
 oc get ocscluster -o json | jq .items[].status
@@ -300,26 +284,7 @@ oc delete pod --all
 
 ## 12 Destroy artifacts
 
-Start a shell in the deployment container:
-```bash
-./sat-deploy.sh env cmd -e ENV_ID="${ENV_ID}"
-```
-
-Login to IBM Cloud.
-```bash
-ibmcloud login --apikey $IBM_CLOUD_API_KEY
-```
-
-Remove Satellite storage association and template for ODF.
-```bash
-export SAT_AUUID=$(ibmcloud sat storage assignment ls --output json | jq -r --arg assoc "${ENV_ID}-assignment" '.[]  | select(.name == $assoc) | .uuid')
-ibmcloud sat storage assignment rm -f --assignment $SAT_AUUID
-export SAT_SUUID=$(ibmcloud sat storage config ls --output json | jq -r --arg config "odf-local-${ENV_ID}" '.[] | select(."config-name" == $config) | .uuid')
-ibmcloud sat storage config rm -f --config $SAT_SUUID
-
-```
-
-Exit container and run the following command to cleanup. If the command fails due to some reason (timeout), start it again.
+If the command fails due to some reason (timeout), start it again.
 
 ```bash
 ./sat-deploy.sh env destroy -e env_id="${ENV_ID}" --confirm-destroy
