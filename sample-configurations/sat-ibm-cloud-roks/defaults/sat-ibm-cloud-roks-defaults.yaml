@@ -19,7 +19,7 @@ sat_host:
     image: ibm-redhat-7-9-minimal-amd64-6
     profile: "bx2-4x16"
 - flavour: cp
-  type: master
+  service: controlplane
   infrastructure:
     type: vpc
     image: ibm-redhat-7-9-minimal-amd64-6
@@ -27,7 +27,7 @@ sat_host:
     storage_profile: 5iops-tier
     volume_size_gb: 100
 - flavour: odf
-  type: worker
+  service: openshift
   infrastructure:
     type: vpc
     image: ibm-redhat-7-9-minimal-amd64-6
@@ -36,7 +36,7 @@ sat_host:
     volume_size_gb: 100
     volume2_size_gb: 500
 - flavour: gpu
-  type: worker
+  service: openshift
   infrastructure:
     type: vpc
     profile: "gx2-8x64x1v100"

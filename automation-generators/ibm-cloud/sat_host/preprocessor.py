@@ -4,7 +4,7 @@ def preprocessor(attributes=None, fullConfig=None):
 
     g = GeneratorPreProcessor(attributes,fullConfig)
     g('name').isRequired()
-    g('type').isRequired().mustBeOneOf(['master', 'worker'])
+    g('service').isRequired().mustBeOneOf(['controlplane', 'openshift'])
 
     g('infrastructure.type').isRequired().mustBeOneOf(['vpc'])
     g('infrastructure.vpc_name').expandWith('vpc[*]').isRequired().mustBeOneOf('vpc[*]')

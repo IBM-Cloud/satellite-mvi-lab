@@ -65,6 +65,14 @@ satellite:
 - name: {{ env_id }}-sat
   zones: [zone1, zone2, zone3]
   bucket: {{ env_id }}-satellite-<random>
+  services:
+    openshift:
+      version: '4.10'
+      os: RHCOS
+      storage:
+        template: odf-local
+        version: '4.10'
+        device_path: '/dev/vde'
 
 vsi:
 - name: {{ env_id }}-bastion
@@ -140,10 +148,10 @@ sat_host:
     - "{{ env_id }}-provision"
 # - name: {{ env_id }}-worker4
 #   flavour: gpu
-#   sat_zone_idx: 2
+#   sat_zone_idx: 3
 #   infrastructure:
 #     image: {{ env_id }}-rhcos410
-#     subnet: {{ env_id }}-subnet-zone-2
+#     subnet: {{ env_id }}-subnet-zone-3
 #     bastion_host: {{ env_id }}-bastion
 #     keys:
 #     - "{{ env_id }}-provision"

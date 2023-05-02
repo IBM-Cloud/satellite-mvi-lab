@@ -3,7 +3,7 @@
   block:
   - name: Set the retry count
     set_fact:
-      retry_count: "{{ 0 if retry_count is undefined else retry_count|int + 1 }}"
+      retry_count: "{{ 0 if retry_count is undefined else retry_count | int + 1 }}"
   
   - name: get hosts
     command: ibmcloud sat host ls --location {{all_config.satellite[0].name}} --output json -q
@@ -22,10 +22,16 @@
       query: "[?name=='{{ hostvars[_host]['sat_host']['name'] }}'].health.status"
       valid_result: ['ready', 'normal', 'provisioning']
 
+  - name: Reset retry count after success
+    set_fact:
+      retry_count: 0
+
   rescue:
-    - fail:
-        msg: Ended after 5 retries
-      when: retry_count | int == 100
+    - name: Reset retry count if max retries reached (exit loop)
+      set_fact:
+        retry_count: 0
+      failed_when: retry_count | 100 >= 100
+      when: retry_count | int >= 100
 
     - debug:
         msg: "Host not ready - Retrying..."

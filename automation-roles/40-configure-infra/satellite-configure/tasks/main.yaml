@@ -3,7 +3,7 @@
   include_tasks: sat-hosts-wait.yaml
   vars:
     _host: "{{item}}"
-  loop: "{{ sat_hosts_cp + sat_hosts_worker }}"
+  loop: "{{ sat_hosts_cp + sat_hosts_ocp }}"
 
 - name: get zones
   block:
@@ -51,7 +51,10 @@
     delay: 10
 
   - name: create cluster
-    command: ibmcloud oc cluster create satellite --location {{all_config.satellite[0].name}} --name {{all_config.satellite[0].name}}-roks --version 4.10_openshift --enable-config-admin --operating-system RHCOS
+    command: >
+      ibmcloud oc cluster create satellite --location {{all_config.satellite[0].name}} 
+        --name {{all_config.satellite[0].name}}-roks --version {{all_config.satellite[0].services.openshift.version}}_openshift
+        --enable-config-admin --operating-system {{all_config.satellite[0].services.openshift.os}}
   when: _cluster_id == []
 
 - name: wait for cluster
@@ -82,21 +85,16 @@
     roks_host: "{{item}}"
     cluster_name: "{{all_config.satellite[0].name}}-roks"
     zone: "{{_zones[hostvars[item]['sat_host']['sat_zone_idx'] | int - 1]}}"
-  loop: "{{ sat_hosts_worker }}"
-
-- name: Retrieve Terraform tfstate from the vault
-  include_role: 
-    name: vault-get-secret
-  vars:
-    secret_name: "{{ environment_name }}-terraform-tfstate"
-    secret_group: "{{ environment_name }}"
-
-- set_fact:
-    _tfstate: "{{ secret_value }}"
+  loop: "{{ sat_hosts_ocp }}"
 
 - name: attach volumes to odf nodes
   include_tasks: sat-host-attach-vol.yaml
   vars:
     roks_host: "{{ item }}"
-    tfstate: "{{ _tfstate }}"
-  loop: "{{ sat_hosts_worker }}"
+  loop: "{{ sat_hosts_ocp }}"
+
+- name: create storage
+  include_tasks: sat-storage.yaml
+  when: all_config['satellite'][0]['services'] is defined and
+        all_config['satellite'][0]['services']['openshift'] is defined and
+        all_config['satellite'][0]['services']['openshift']['storage'] is defined

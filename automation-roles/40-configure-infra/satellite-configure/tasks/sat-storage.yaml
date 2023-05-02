@@ -1,0 +1,58 @@
+---
+- name: wait for cluster being ready to deploy
+  command: ibmcloud oc cluster get -c {{ _cluster_id }} --output json -q
+  register: output
+  until: output.stdout | from_json | json_query('state') == 'normal'
+  retries: 100
+  delay: 30
+
+- name: get satellite location id
+  set_fact:
+    _sat_id: "{{ tfstate.resources | json_query(query) | first }}"
+  vars:
+    query: >-
+      [?type=='ibm_satellite_location' && instances[0].attributes.location=='{{ all_config.satellite[0].name }}'].
+      instances[0].attributes.id
+
+- name: get storage config
+  block:
+  - name: get configs
+    command: ibmcloud sat storage config ls --location {{ all_config.satellite[0].name }} --output json -q
+    register: output
+
+  - set_fact:
+      _storage_configs: "{{ output.stdout | from_json | json_query(query) }}"
+    vars:
+      query: "[?location == '{{ all_config.satellite[0].name }}']"
+
+  - debug:
+      var: _storage_configs
+
+- name: create storage template
+  command: >
+    ibmcloud sat storage config create --name {{ env_id }}-odf-local --template-name {{ _template }} 
+      --template-version {{ _version }} --location {{ _sat_id }} -p "auto-discover-devices=false" 
+      -p "iam-api-key={{ _api_key }}"  -p "osd-device-path={{ _osd_device_path }}" -p "ignore-noobaa=true"
+  vars:
+    _template: "{{all_config['satellite'][0]['services']['openshift']['storage']['template'] }}"
+    _version: "{{all_config['satellite'][0]['services']['openshift']['storage']['version'] }}"
+    _osd_device_path: "{{all_config['satellite'][0]['services']['openshift']['storage']['device_path'] }}"
+    _api_key: "{{ IBM_ODF_API_KEY }}"
+  when: _storage_configs == []
+
+- name: get storage assignment
+  block:
+  - name: get assignments
+    command: ibmcloud sat storage assignment ls --location {{ all_config.satellite[0].name }} --output json -q
+    register: output
+
+  - set_fact:
+      _storage_assignments: "{{ output.stdout | from_json | json_query(query) }}"
+    vars:
+      query: "[?name == '{{ env_id }}-assignment']"
+
+- name: create storage assignment
+  command: >
+    ibmcloud sat storage assignment create --name {{ env_id }}-assignment -c {{ _cluster_id }}
+    --config {{ env_id }}-odf-local
+  when: _storage_assignments == []
