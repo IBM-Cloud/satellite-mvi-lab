@@ -34,6 +34,22 @@
       allowed_ips: "{{ hostvars['localhost']['all_config'] | json_query('subnet[*].ipv4_cidr_block') | join(',') }}"
       client_conf_path: '{{status_dir}}/downloads/'
 
+- name: 40 - Configure infrastructure - Bastion server ocp client
+  hosts: vpc_bastion_server
+  become: True
+  gather_facts: False
+
+  tasks:
+  - name: install OpenShift client on bastion server
+    include_role: 
+      name: sat-host-ibmcloud-vpc-bastion-ocp
+    vars:
+      _p_ocp_version: "{{ hostvars['localhost'].all_config.satellite[0].services.openshift.version }}"
+      cloud_platform: "{{ hostvars['localhost']['cloud_platform'] }}"
+      all_config: "{{ hostvars['localhost']['all_config'] }}"
+    when: all_config['satellite'][0]['services'] is defined and
+          all_config['satellite'][0]['services']['openshift'] is defined
+
 - name: 40 - Configure infrastructure - Satellite servers - master
   hosts: sat_hosts_master
   become: True
@@ -64,7 +80,6 @@
 
 - name: 40 - Configure infrastructure - Satellite
   hosts: localhost
-  connection: local
   become: True
   gather_facts: False
 

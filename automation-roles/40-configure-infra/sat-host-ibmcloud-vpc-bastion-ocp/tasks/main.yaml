@@ -1,0 +1,24 @@
+---
+- name: Download OpenShift client to bastion host
+  include_role:
+    name: openshift-download-client
+  vars:
+    _download_dir: '/tmp'
+    _remote_src: yes
+
+- name: Download ibmcloud to bastion host
+  include_role:
+    name: download-ibmcloud
+  vars:
+    _download_dir: '/tmp'
+    _remote_src: yes
+
+- name: install pip3 package
+  apt:
+    name: python3-pip
+    state: present
+    update_cache: yes
+
+- name: Install kubernetes python package
+  ansible.builtin.pip:
+    name: kubernetes

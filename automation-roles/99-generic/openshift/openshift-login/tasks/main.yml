@@ -25,6 +25,7 @@
     name: openshift-download-client
   vars:
     _p_ocp_version: "{{ _openshift_cluster.ocp_version }}"
+    _download_dir: "{{ status_dir }}"
 
 - include_tasks: ibmcloud-login-roks-ocp.yml
   when: cloud_platform == 'ibm-cloud'

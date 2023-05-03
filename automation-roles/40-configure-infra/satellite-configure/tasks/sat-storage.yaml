@@ -56,3 +56,6 @@
     ibmcloud sat storage assignment create --name {{ env_id }}-assignment -c {{ _cluster_id }}
     --config {{ env_id }}-odf-local
   when: _storage_assignments == []
+
+- name: wait for storage to be ready
+  include_tasks: sat-storage-wait.yaml

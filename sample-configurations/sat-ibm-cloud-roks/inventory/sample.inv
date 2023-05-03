@@ -1,5 +1,5 @@
 [automation]
-localhost
+localhost ansible_connection=local
 
 [automation:vars]
 environment_name=sample

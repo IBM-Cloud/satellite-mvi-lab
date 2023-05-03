@@ -1,0 +1,28 @@
+---
+- name: activate registry
+  delegate_to: "{{groups['vpc_bastion_server'][0]}}"
+  block:
+  - name: login to openshift
+    shell: |
+      ibmcloud login --apikey "{{ ibmcloud_api_key }}" --no-region
+      ibmcloud oc cluster config --admin -c "{{ env_id }}-sat-roks" 
+
+  - name: pvc for registry
+    kubernetes.core.k8s:
+      state: present
+      definition: "{{ lookup('file', '/data/config/openshift/pvc-registry.yaml') | from_yaml }}"
+
+  - name: patch imageregistry
+    kubernetes.core.k8s_json_patch:
+      kind: Config
+      api_version: 'imageregistry.operator.openshift.io/v1'
+      name: cluster
+      patch:
+        - op: replace
+          path: /spec/managementState
+          value: Managed
+        - op: replace
+          path: /spec/storage
+          value:
+            pvc:
+              claim: openshift-image-registry
