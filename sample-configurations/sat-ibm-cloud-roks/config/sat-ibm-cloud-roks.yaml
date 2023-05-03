@@ -146,7 +146,7 @@ sat_host:
     bastion_host: {{ env_id }}-bastion
     keys:
     - "{{ env_id }}-provision"
-# - name: {{ env_id }}-worker4
+# - name: {{ env_id }}-gpu
 #   flavour: gpu
 #   sat_zone_idx: 3
 #   infrastructure:
