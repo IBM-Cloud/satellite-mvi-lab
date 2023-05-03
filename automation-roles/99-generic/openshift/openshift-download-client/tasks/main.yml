@@ -4,6 +4,7 @@
     that:
       - cloud_platform is defined
       - _p_ocp_version is defined
+      - _download_dir is defined
 
 - name: Validate cloud_platform is implemented
   fail: msg="cloud_platform {{ cloud_platform }} is not implemented, current implemented cloud platforms are {{ implemented_cloud_platform_types }} "
@@ -11,27 +12,27 @@
 
 - name: Create downloads directory
   file:
-    path: "{{ status_dir }}/downloads"
+    path: "{{ _download_dir }}/downloads"
     state: directory
 
 - name: Retrieve x.y version for download
   set_fact:
     _ocp_download_version: "{{ _p_ocp_version | regex_search('([0-9].[0-9]+)','\\1') | first }}"
 
-- name: Unpack Terraform from {{ status_dir }}/downloads/terraform_linux_amd64.zip
+- name: Unpack Terraform from {{ _download_dir }}/downloads/terraform_linux_amd64.zip
   set_fact:
     _openshift_client_package: "{{_openshift_client_package_arm}}"
   when: ansible_architecture == 'aarch64'
 
 - name: Check if OpenShift client was already downloaded
   stat:
-    path: "{{ status_dir }}/downloads/{{ _openshift_client_package }}-{{ _ocp_download_version }}"
+    path: "{{ _download_dir }}/downloads/{{ _openshift_client_package }}-{{ _ocp_download_version }}"
   register: _ocp_client_download
 
 - name: Download OpenShift client "{{ _openshift_clients_base_url }}{{ _ocp_download_version }}/{{ _openshift_client_package }}"
   get_url:
     url: "{{ _openshift_clients_base_url }}{{ _ocp_download_version }}/{{ _openshift_client_package }}"
-    dest: "{{ status_dir }}/downloads/{{ _openshift_client_package }}-{{ _ocp_download_version }}"
+    dest: "{{ _download_dir }}/downloads/{{ _openshift_client_package }}-{{ _ocp_download_version }}"
     owner: root
     mode: 0644
   register: _download_result
@@ -40,10 +41,11 @@
   delay: 30
   when: _ocp_client_download.stat.exists == False
 
-- name: Unpack OpenShift client from {{ status_dir }}/downloads/{{ _openshift_client_package }}-{{ _ocp_download_version }}
+- name: Unpack OpenShift client from {{ _download_dir }}/downloads/{{ _openshift_client_package }}-{{ _ocp_download_version }}
   unarchive:
-    src: "{{ status_dir }}/downloads/{{ _openshift_client_package }}-{{ _ocp_download_version }}"
+    src: "{{ _download_dir }}/downloads/{{ _openshift_client_package }}-{{ _ocp_download_version }}"
     dest: "/usr/local/bin"
+    remote_src: "{{ _remote_src | default('no') }}"
 
 - name: Get OpenShift client version
   shell: |

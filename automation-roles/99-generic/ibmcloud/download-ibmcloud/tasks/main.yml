@@ -10,18 +10,18 @@
 
 - name: Create downloads directory
   file:
-    path: "{{ status_dir }}/downloads"
+    path: "{{ _download_dir }}/downloads"
     state: directory
 
 - name: Check if ibmcloud download was already done
   stat:
-    path: "{{ status_dir }}/downloads/ibmcloud-linux.sh"
+    path: "{{ _download_dir }}/downloads/ibmcloud-linux.sh"
   register: _ibmcloud_download
 
 - name: Download ibmcloud tool
   get_url:
     url: "{{ _v_ibm_cloud_cli }}"
-    dest: "{{ status_dir }}/downloads/ibmcloud-linux.sh"
+    dest: "{{ _download_dir }}/downloads/ibmcloud-linux.sh"
     owner: root
     mode: 0700
   register: _download_result
@@ -37,7 +37,7 @@
 
 - name: Run ibmcloud installer
   shell: |
-    {{ status_dir }}/downloads/ibmcloud-linux.sh && \
+    {{ _download_dir }}/downloads/ibmcloud-linux.sh && \
     ibmcloud plugin install kubernetes-service -f && \
     ibmcloud plugin install container-registry -f && \
     ibmcloud plugin install is -f

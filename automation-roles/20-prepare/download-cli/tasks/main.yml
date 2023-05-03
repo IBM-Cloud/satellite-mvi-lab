@@ -12,3 +12,4 @@
     name: openshift-download-client
   vars:
     _p_ocp_version: '4.10'
+    _download_dir: "{{ status_dir }}"

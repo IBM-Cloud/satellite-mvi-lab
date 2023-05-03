@@ -94,7 +94,13 @@
   loop: "{{ sat_hosts_ocp }}"
 
 - name: create storage
-  include_tasks: sat-storage.yaml
+  block:
+  - name: create storage
+    include_tasks: sat-storage.yaml
+  
+  - name: activate ocp image registry
+    include_tasks: sat-ocp-registry.yaml
+  
   when: all_config['satellite'][0]['services'] is defined and
         all_config['satellite'][0]['services']['openshift'] is defined and
         all_config['satellite'][0]['services']['openshift']['storage'] is defined

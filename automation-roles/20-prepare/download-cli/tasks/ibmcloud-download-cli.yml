@@ -2,6 +2,8 @@
 - name: Download ibmcloud CLI
   include_role:
     name: download-ibmcloud
+  vars:
+    _download_dir: "{{ status_dir }}"
 
 - name: Download and install Terraform
   include_role:

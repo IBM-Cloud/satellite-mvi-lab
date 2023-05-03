@@ -47,65 +47,22 @@ export ENV_ID=xy-mvi5  # update
 ./sat-deploy.sh env apply -e env_id="${ENV_ID}" -e IBM_ODF_API_KEY="${IBM_ODF_API_KEY}" -v
 ```
 
-Connect to the private network of your Satellite Location using the wireguard configuration file found in:
+If you want to open the OpenShift console at this stage, connect to the private network of your Satellite Location using the wireguard configuration file found in:
 ```code
 data/status/sample/downloads/client.conf
 ```
 
-Wait until OpenShift has become ready. Currently Ansible exits before this.
-
 ## 4 Configure OpenShift Data Foundation(ODF)
 
-### TODO: write an Ansible playbook for this task
+This is done by the automation. For background information checkout ui-docs.
 
-Start a shell in the deployment container:
-```bash
-./sat-deploy.sh env cmd -e ENV_ID="${ENV_ID}"
-```
-You should have an command prompt inside the docker container, which contains all CLIs like ibmcloud and oc.
-Connect to your Cloud Account and Openshift cluster:
-```bash
-ibmcloud login --apikey $IBM_CLOUD_API_KEY --no-region
-ibmcloud oc cluster config --admin -c "${ENV_ID}-sat-roks"
-```
-
-Wait 5-10 minutes and watch the output of until it is ready. Check the OpenShift UI for what is going on: operators, pods, etc.
-```bash
-oc get ocscluster -o json | jq .items[].status
-```
-
-Wait for status gats into ready state. Ignore intermediate errors of this state.  
-{
-  "storageClusterStatus": "Ready"
-}
+### TODO link info
 
 ## 5 Activate OpenShift registry
-Run the following commmand to create a PVC in OpenShift for the OpenShift Registray and activate the Registry Operator
-```bash
-oc create -f - <<EOF
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: openshift-image-registry
-  namespace: openshift-image-registry
-spec:
-  accessModes:
-    - ReadWriteMany
-  resources:
-    requests:
-      storage: 100Gi
-  storageClassName: sat-ocs-cephfs-gold
-EOF
 
-oc patch configs.imageregistry.operator.openshift.io/cluster \
-    --type='json' \
-    --patch='[
-        {"op": "replace", "path": "/spec/managementState", "value": "Managed"},
-        {"op": "replace", "path": "/spec/storage", "value": {"pvc":{"claim": "openshift-image-registry" }}}
-    ]'
+This is done by the automation. For background information checkout ui-docs.
 
-```
-Exit container.
+### TODO link info
 
 ## 6 Add a GPU node to the environment
 

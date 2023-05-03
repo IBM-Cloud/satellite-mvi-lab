@@ -1,0 +1,21 @@
+---
+- name: wait for storage
+  delegate_to: "{{groups['vpc_bastion_server'][0]}}"
+  block:
+  - debug:
+      var: groups['vpc_bastion_server'][0]
+
+  - name: login to openshift
+    shell: |
+      ibmcloud login --apikey "{{ ibmcloud_api_key }}" --no-region
+      ibmcloud oc cluster config --admin -c "{{ env_id }}-sat-roks" 
+
+  - name: wait for ocscluster-auto
+    kubernetes.core.k8s_info:
+      kind: OcsCluster
+      name: 'ocscluster-auto'
+    register: ocs_result
+    until: ocs_result | json_query('resources[*].status.storageClusterStatus') | default(['error'], true) | first == 'Ready'
+    retries: 50
+    delay: 30
+
