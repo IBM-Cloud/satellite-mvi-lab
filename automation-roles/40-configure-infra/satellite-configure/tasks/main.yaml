@@ -100,6 +100,13 @@
   
   - name: activate ocp image registry
     include_tasks: sat-ocp-registry.yaml
+
+- name: fix GPU image tag
+  block:
+  - name: fix image tag
+    include_tasks: sat-gpu.yaml
+    vars:
+      _nodename: "{{ hostvars[sat_hosts_ocp[0]]['sat_host']['name'] }}"  
   
   when: all_config['satellite'][0]['services'] is defined and
         all_config['satellite'][0]['services']['openshift'] is defined and
