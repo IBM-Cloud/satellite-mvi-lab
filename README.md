@@ -92,79 +92,8 @@ ibmcloud oc cluster config --admin -c "${ENV_ID}-sat-roks"
 ROLE_NAME=nvidia_gpu ansible-playbook ibm.mas_devops.run_role
 ```
 
-Note: Due to a bug the last task won't succeed:  "Wait for Cluster Policy instance to be ready"
-You can terminate it by pressing \<ctrl>\<c>
-
-### Fix failing install of gpu operator
-Due to this bug the gpu operator fails to install: https://github.com/NVIDIA/gpu-operator/issues/428
-
-To fix this we need to create a new tag using this template:
-
-```
-oc -n openshift tag <copy from release.txt> driver-toolkit:<coreos machine version>
-```
-
-Get the tag (machine version) with the following command
-```bash
-oc get nodes -o json | grep osImage
-```
-Example output
-```
-[48] root@Satellite Deployer:/ # oc get nodes -o json | grep osImage
-                    "osImage": "Red Hat Enterprise Linux CoreOS 410.84.202304042113-0 (Ootpa)",
-                    "osImage": "Red Hat Enterprise Linux CoreOS 410.84.202304042113-0 (Ootpa)",
-                    "osImage": "Red Hat Enterprise Linux CoreOS 410.84.202304042113-0 (Ootpa)",
-```
-In this case the machione version is "410.84.202304042113-0"
-
-Get the Openshift version
-```bash
-oc get nodes -o json | grep version
-```
-Example output
-```
-[49] root@Satellite Deployer:/ # oc get nodes -o json | grep version
-                    "ibm-cloud.kubernetes.io/worker-version": "4.10.57_1565_openshift",
-                    "ibm-cloud.kubernetes.io/worker-version": "4.10.57_1565_openshift",
-                    "ibm-cloud.kubernetes.io/worker-version": "4.10.57_1565_openshift",
-                    "ibm-cloud.kubernetes.io/worker-version": "4.10.57_1565_openshift",
-                    "ibm-cloud.kubernetes.io/worker-version": "4.10.57_1565_openshift",
-                    "ibm-cloud.kubernetes.io/worker-version": "4.10.57_1565_openshift",
-```
-
-In this case the version is 4.10.57
-
-The image name and hash can be found in realease.txt of OCP clients (here for version 4.10.57):
-
-https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.10.57/release.txt
-
-Check that machine os version (approximately line 20) matches our tag. If this is not the case, go to an earlier
-or later version.
-Find image for driver-toolkit, i.e. 
-quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:51e2043014581f30f456f54aacd983b6736b3a7d83c171ed7e0f78d3c13b550e
-
-- Complete the command, i.e.
-```
-oc -n openshift tag quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:51e2043014581f30f456f54aacd983b6736b3a7d83c171ed7e0f78d3c13b550e driver-toolkit:410.84.202303181059-0
-```
-- Execute the command. Then delete the pod nvidia-driver-daemonset-xxx-. It will get recreated and the driver will install.
-- Verify that all pods are running:
-```
-[35] root@Satellite Deployer:/ # oc get pod -n nvidia-gpu-operator
-NAME                                                  READY   STATUS      RESTARTS   AGE
-gpu-feature-discovery-c7vmv                           1/1     Running     0          5h15m
-gpu-operator-6bc8c5bcf6-rjwq8                         1/1     Running     0          5h37m
-nvidia-container-toolkit-daemonset-pdcw5              1/1     Running     0          5h15m
-nvidia-cuda-validator-kgpkj                           0/1     Completed   0          5h11m
-nvidia-dcgm-exporter-ggzcr                            1/1     Running     0          5h15m
-nvidia-dcgm-ns7j9                                     1/1     Running     0          5h15m
-nvidia-device-plugin-daemonset-dmwm4                  1/1     Running     0          5h15m
-nvidia-device-plugin-validator-4h2nl                  0/1     Completed   0          5h10m
-nvidia-driver-daemonset-410.84.202303181059-0-mcg6m   2/2     Running     0          5h16m
-nvidia-node-status-exporter-hxs2n                     1/1     Running     0          5h36m
-nvidia-operator-validator-b59gb                       1/1     Running     0          5h15m
-```
-
+### GPU operator fix
+The automation fixes the following issue https://github.com/NVIDIA/gpu-operator/issues/428.
 
 ## 7 Install Maximo core
 

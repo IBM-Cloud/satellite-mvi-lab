@@ -1,0 +1,40 @@
+---
+- name: sat-gpu
+  block:
+  - name: login to openshift
+    shell: |
+      ibmcloud login --apikey "{{ ibmcloud_api_key }}" --no-region
+      ibmcloud oc cluster config --admin -c "{{ env_id }}-sat-roks"  
+
+  - debug:
+      var: _nodename         
+  
+  - name: get node info
+    kubernetes.core.k8s_info:
+      kind: node
+      name: "{{ _nodename }}"
+    register: result
+
+  - name: parse version
+    set_fact:
+      _version: "{{ result | json_query(query) | regex_search('(\\d+.\\d+.\\d+)_.+', '\\1') | first }}"
+    vars:
+      query: 'resources[*].metadata.labels."ibm-cloud.kubernetes.io/worker-version"'
+
+  - name: get RHOCS release.txt
+    uri:
+      url: 'https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/{{_version}}/release.txt'
+      return_content: true
+    register: result
+
+  - name: parse machine os version
+    set_fact:
+      _os_version: "{{ result.content | regex_search('machine-os\\s+(\\S+)', '\\1') | first }}"
+
+  - name: parse image source
+    set_fact:
+      _image: "{{ result.content | regex_search('driver-toolkit\\s+(quay.io\\S+)', '\\1') | first }}"
+
+  - name: oc tag 
+    shell: |
+      oc -n openshift tag {{ _image }} driver-toolkit:{{ _os_version }}
