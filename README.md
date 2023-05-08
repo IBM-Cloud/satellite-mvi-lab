@@ -93,9 +93,7 @@ ibmcloud oc cluster config --admin -c "${ENV_ID}-sat-roks"
 ```bash
 ROLE_NAME=nvidia_gpu ansible-playbook ibm.mas_devops.run_role
 ```
-
-### GPU operator fix
-The automation fixes the following issue https://github.com/NVIDIA/gpu-operator/issues/428.
+Normally this step would fail with Satellite ROKS clusters because of the following issue https://github.com/NVIDIA/gpu-operator/issues/428. We addressed this automatically in previous steps of the automation, which sets the right imagetag for the NVIDIA operator.
 
 ## 7 Install Maximo core
 
