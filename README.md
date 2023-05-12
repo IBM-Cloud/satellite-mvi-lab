@@ -9,35 +9,34 @@ At the time of writing this MVI 8.8, which comes with Maximo Application Suite 8
 
 <p align="center"><img src="images/deployment.png" width="400" style="background-color: white"/></p>
 
-## 1 Prereqs
-- podman installed
-- on MacOS make sure to have mounted home folders, i.e.
+## 1. Prerequisites
+- Podman installed
+- On MacOS make sure to have mounted home folders, i.e.
 ```bash
 podman machine init --cpus=4 --memory=4096 -v $HOME:$HOME
 ```
-- publicly accessable qcow image to RHCOS. e.g. cos://eu-de/images-mvi-on-sat/rhcos-4.10.37-x86_64-ibmcloud.x86_64.qcow2
-- resource group should exist
+- Publicly accessable qcow image to RHCOS. e.g. cos://eu-de/images-mvi-on-sat/rhcos-4.10.37-x86_64-ibmcloud.x86_64.qcow2
+- Resource group should exist
+- [Prepare ibm cloud account](prerequisites.md)
 
-- [prepare ibm cloud account](prerequisites.md)
-
-## 2 Prepare
-- make sure podman is installed
-- build the container:
+## 2. Prepare
+- Make sure podman is installed
+- Build the container:
 ```bash
-  ./sat-deploy.sh build
+./sat-deploy.sh build
 ```
-- copy sample-configurations/sat-ibm-cloud-roks to some folder
+- Copy sample-configurations/sat-ibm-cloud-roks to some folder
 ```bash
-  mkdir -p data/config/sample
-  mkdir -p data/status/sample
-  cp -r ./sample-configurations/sat-ibm-cloud-roks/* data/config/sample
+mkdir -p data/config/sample
+mkdir -p data/status/sample
+cp -r ./sample-configurations/sat-ibm-cloud-roks/* data/config/sample
 ```
-- update resource_group in data/config/sample/config/sat-ibm-cloud-roks.yaml
-- update href for custom_image in data/config/sample/config/sat-ibm-cloud-roks.yaml
-- update ibm_cloud_region in data/config/sample/inventory/sample.inv
-- update ibm_cloud_location (for satellite) in data/config/sample/inventory/sample.inv
+- Update ```resource_group``` in ```data/config/sample/config/sat-ibm-cloud-roks.yaml```
+- Update href for ```custom_image``` in ```data/config/sample/config/sat-ibm-cloud-roks.yaml```
+- Update ```ibm_cloud_region``` in ```data/config/sample/inventory/sample.inv```
+- Update ```ibm_cloud_location``` (for satellite) in ```data/config/sample/inventory/sample.inv```
 
-## 3 Create satellite + OpenShift cluster
+## 3. Create satellite + OpenShift cluster
 
 ```bash
 export STATUS_DIR=$(pwd)/data/status/sample
@@ -54,19 +53,17 @@ If you want to open the OpenShift console at this stage, connect to the private 
 data/status/sample/downloads/client.conf
 ```
 
-## 4 Configure OpenShift Data Foundation(ODF)
+## 4. Configure OpenShift Data Foundation(ODF)
 
-This is done by the automation. For background information checkout ui-docs.
+This step is done by the automation. For background information visit [ui-docs/odf.md](./ui-docs/odf.md)
 
-### TODO link info
 
-## 5 Activate OpenShift registry
+## 5. Activate OpenShift registry
 
-This is done by the automation. For background information checkout ui-docs.
+This step is done by the automation. For background information visit [ui-docs/registry.md](./ui-docs/registry.md)
 
-### TODO link info
 
-## 6 Add a GPU node to the environment
+## 6. Add a GPU node to the environment
 
 Edit configuration file data/config/sample/config/sat-ibm-cloud-roks.yaml and uncomment gpu node in section sat_host.
 Stay in the same shell as before, then requirement variables are still set. Execute the following apply command. Note
@@ -94,17 +91,19 @@ ibmcloud oc cluster config --admin -c "${ENV_ID}-sat-roks"
 ROLE_NAME=nvidia_gpu ansible-playbook ibm.mas_devops.run_role
 ```
 Normally this step would fail with Satellite ROKS clusters because of the following issue https://github.com/NVIDIA/gpu-operator/issues/428. We addressed this automatically in previous steps of the automation, which sets the right imagetag for the NVIDIA operator.
+<br>
+To learn more about this step and troubleshooting, visit [ui-docs/gpu.md](./ui-docs/gpu.md)
 
-## 7 Install Maximo core
+## 7. Install Maximo core
 
 - Copy Maximo configuration files:
 
 ```bash
-  mkdir -p data/status/sample/mvi
-  cp -r ./sample-configurations/mvi/* data/status/sample/mvi
+mkdir -p data/status/sample/mvi
+cp -r ./sample-configurations/mvi/* data/status/sample/mvi
 
 ```
-- Edit and complete data/status/sample/mvi/masEnv.sh 
+- Edit and complete ```data/status/sample/mvi/masEnv.sh```
 Look for all parametes in brackets \<param>
 
 - Run the automation playbook. cmd container should be still running. If not start again and login to OpenShift.
@@ -116,8 +115,11 @@ ansible-playbook ibm.mas_devops.oneclick_core
 ```
 
 - Take a note of the superuser name and password displayed at the end of the playbook.
+<br>
 
-## 8 Install MVI
+For more information on this step, visit [ui-docs/mas.md](./ui-docs/mas.md)
+
+## 8. Install MVI
 
 ```bash
 source /data/status/mvi/masEnv.sh
@@ -146,11 +148,13 @@ Wait until all pods have been recreated. The pvc task pod is expected to fail af
 ```bash
 oc get pod -n mas-inst1-visualinspection
 ```
+<br>
 
+For more information on this step, visit [ui-docs/mvi.md](./ui-docs/mvi.md)
 
-## 9 Login as superuser and create admin user
+## 9. Login as superuser and create admin user
 
-- Using the superuser credentials that were created upon successful installation to login to MAS UI ```https://admin.maximo.<your-domain>.com```
+- Using the superuser credentials that were created upon successful installation to login to MAS UI ```https://admin.<maximo-domain>```
 ![](images/mas-login.png)
 - Go to ```Administration``` > ```Users``` to create a new admin user (15 AppPoints) and fill in the details for the user like name, email and password.
 
@@ -160,20 +164,20 @@ oc get pod -n mas-inst1-visualinspection
 ![](images/admin-entitlement.png)
 - Save the credentials, logout of the super user and login with the new admin user created to confirm access to the platform.
 
-## 10 Expose MAS to the internet
+## 10. Expose MAS to the internet
 
-- Edit configuration file data/config/sample/config/sat-ibm-cloud-roks.yaml and uncomment the loadbalancer.
+- Edit configuration file ```data/config/sample/config/sat-ibm-cloud-roks.yaml``` and uncomment the loadbalancer.
 - Run the following command:
 
 ```bash
 ./sat-deploy.sh env apply -e env_id="${ENV_ID}" -v
 ```
 
-## 11 Load demo model and conect MVI mobile
+## 11. Load demo model and conect MVI mobile
 
 
 
-## 12 Destroy artifacts
+## 12. Destroy artifacts
 
 If the command fails due to some reason (timeout), start it again.
 
