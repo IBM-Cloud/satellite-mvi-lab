@@ -1,5 +1,6 @@
 ---
 - name: sat-gpu
+  delegate_to: "{{groups['vpc_bastion_server'][0]}}"
   block:
   - name: login to openshift
     shell: |
