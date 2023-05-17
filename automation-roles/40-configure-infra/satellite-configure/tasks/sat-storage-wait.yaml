@@ -16,6 +16,6 @@
       name: 'ocscluster-auto'
     register: ocs_result
     until: ocs_result | json_query('resources[*].status.storageClusterStatus') | default(['error'], true) | first == 'Ready'
-    retries: 50
-    delay: 30
+    retries: 60
+    delay: 60
 

@@ -11,5 +11,7 @@
   include_role:
     name: openshift-download-client
   vars:
-    _p_ocp_version: '4.10'
+    _p_ocp_version: "{{ all_config.satellite[0].services.openshift.version }}"
     _download_dir: "{{ status_dir }}"
+  when: all_config['satellite'][0]['services'] is defined and
+        all_config['satellite'][0]['services']['openshift'] is defined

@@ -50,11 +50,15 @@
     retries: 250
     delay: 10
 
+  - set_fact:
+      _pull_secret: --pull-secret '{{ OCP_PULL_SECRET }}'
+    when: OCP_PULL_SECRET | default("") | length > 0
+
   - name: create cluster
     command: >
       ibmcloud oc cluster create satellite --location {{all_config.satellite[0].name}} 
         --name {{all_config.satellite[0].name}}-roks --version {{all_config.satellite[0].services.openshift.version}}_openshift
-        --enable-config-admin --operating-system {{all_config.satellite[0].services.openshift.os}}
+        --enable-config-admin --operating-system {{all_config.satellite[0].services.openshift.os}} {{ _pull_secret | default("") }}
   when: _cluster_id == []
 
 - name: wait for cluster
