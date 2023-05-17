@@ -1,4 +1,9 @@
 ---
+- name: Validate mandatory variables for storage
+  assert:
+    that:
+      - IBM_ODF_API_KEY is defined
+
 - name: wait for cluster being ready to deploy
   command: ibmcloud oc cluster get -c {{ _cluster_id }} --output json -q
   register: output
