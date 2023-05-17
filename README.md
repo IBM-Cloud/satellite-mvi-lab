@@ -44,8 +44,9 @@ export CONFIG_DIR=$(pwd)/data/config/sample
 export IBM_CLOUD_API_KEY=*****
 export IBM_ODF_API_KEY=*****
 export ENV_ID=xy-mvi5  # update
+export OCP_PULL_SECRET=''  # If you have a pull secret for OCP, set this variable. Keep the single quotes around the pull secret
 
-./sat-deploy.sh env apply -e env_id="${ENV_ID}" -e IBM_ODF_API_KEY="${IBM_ODF_API_KEY}" -v
+./sat-deploy.sh env apply -e env_id="${ENV_ID}" -e IBM_ODF_API_KEY="${IBM_ODF_API_KEY}" -e OCP_PULL_SECRET='${OCP_PULL_SECRET}' -v
 ```
 
 If you want to open the OpenShift console at this stage, connect to the private network of your Satellite Location using the wireguard configuration file found in:

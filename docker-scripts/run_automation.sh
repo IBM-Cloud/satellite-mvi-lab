@@ -79,8 +79,8 @@ env|environment)
   run_cmd+=" ${ANSIBLE_VERBOSE}"
   if [ -v EXTRA_PARMS ];then
     for p in ${EXTRA_PARMS};do
-      echo "Extra param $p=${!p}"
-      run_cmd+=" --extra-vars $p=${!p}"
+      echo "Extra param $p='${!p}'"
+      run_cmd+=" --extra-vars $p='${!p}'"
     done
   fi
 
