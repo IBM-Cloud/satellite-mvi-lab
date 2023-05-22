@@ -19,10 +19,26 @@ export MAS_APP_SETTINGS_VISUALINSPECTION_STORAGE_CLASS=sat-ocs-cephfs-gold
 export MONGODB_CPU_REQUESTS=200m
 export MONGODB_REPLICAS=1
 
-export DNS_PROVIDER=cis
-export MAS_DOMAIN=<your full maximo domain>
-export MAS_CLUSTER_ISSUER=inst1-cis-le-prod
-export CIS_SUBDOMAIN=maximo    # <your full maximo domain> will be <cis subdomain>.<your custom domain>
-export CIS_EMAIL=<your email>
-export CIS_APIKEY=<CIS api key>
-export CIS_CRN='<your cis crn>'  #keep the single quotes
+
+########################################################################################
+## Edit this block if your are using Cloudflare as DNS Provider
+export DNS_PROVIDER='cloudflare'
+export MAS_DOMAIN=<your full maximo domain> # <your full maximo domain> will be <CLOUDFLARE_SUBDOMAIN>.<CLOUDFLARE_ZONE>
+export MAS_CLUSTER_ISSUER=inst1-cloudflare-le-prod
+export CLOUDFLARE_ZONE=<your domain in Cloudflare>
+export CLOUDFLARE_SUBDOMAIN=maximo
+export CLOUDFLARE_EMAIL=<your mail from Cloudflare account>
+export CLOUDFLARE_APITOKEN=<your api token with access to DNS settings of the domain in Cloudflare account>
+#########################################################################################
+
+########################################################################################
+## Comment the previous block and uncomment/edit this block if your are using IBM Cloud Internet Services instance as DNS Provider
+# export DNS_PROVIDER=cis
+# export MAS_DOMAIN=<your full maximo domain>
+# export MAS_CLUSTER_ISSUER=inst1-cis-le-prod
+# export CIS_SUBDOMAIN=maximo    # <your full maximo domain> will be <cis subdomain>.<your custom domain>
+# export CIS_EMAIL=<your email>
+# export CIS_APIKEY=<CIS api key>
+# export CIS_CRN='<your cis crn>'  #keep the single quotes
+########################################################################################
+
