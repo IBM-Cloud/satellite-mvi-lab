@@ -20,6 +20,7 @@ podman machine init --cpus=4 --memory=4096 -v $HOME:$HOME
 - [Prepare ibm cloud account](prerequisites.md)
 
 ## 2. Prepare
+> Estimated time: 5 minutes
 - Make sure podman is installed
 - Build the container:
 ```bash
@@ -36,8 +37,8 @@ cp -r ./sample-configurations/sat-ibm-cloud-roks/* data/config/sample
 - Update ```ibm_cloud_region``` in ```data/config/sample/inventory/sample.inv```
 - Update ```ibm_cloud_location``` (for satellite) in ```data/config/sample/inventory/sample.inv```
 
-## 3. Create satellite + OpenShift cluster
-
+## 3. Create Satellite Location + OpenShift cluster
+> Estimated time (steps 3,4,5 combined): 1.5 hours 
 ```bash
 export STATUS_DIR=$(pwd)/data/status/sample
 export CONFIG_DIR=$(pwd)/data/config/sample
@@ -57,7 +58,10 @@ data/status/sample/downloads/client.conf
 ## 4. Configure OpenShift Data Foundation(ODF)
 
 This step is done by the automation. For background information visit [ui-docs/odf.md](./ui-docs/odf.md)
-
+You can confirm the that the storage assignment is successful by running the following command
+```
+ibmcloud sat storage config get --config ${ENV_ID}-odf-local
+```
 
 ## 5. Activate OpenShift registry
 
@@ -65,17 +69,17 @@ This step is done by the automation. For background information visit [ui-docs/r
 
 
 ## 6. Add a GPU node to the environment
+> Estimated time: 10 minutes
 
-Edit configuration file data/config/sample/config/sat-ibm-cloud-roks.yaml and uncomment gpu node in section sat_host.
-Stay in the same shell as before, then requirement variables are still set. Execute the following apply command. Note
-that due to limited capacity of GPU instances this command may fail. If it fails, try a different zone.
-
+Edit configuration file ```data/config/sample/config/sat-ibm-cloud-roks.yaml``` and uncomment gpu node in section ```sat_host```.<br>
+Stay in the same shell as before, then requirement variables are still set. Execute the following apply command.
 ```bash
 ./sat-deploy.sh env apply -e env_id="${ENV_ID}" -v --confirm-destroy
 ```
+> Note: Due to limited capacity of GPU instances this command may fail. If it fails, try a different zone. Check if a failed GPU vsi is created and make sure to delete it before executing the command again.
 
 ### Deploy the Nvidia GPU operator
-
+> Estimated time: 15 minutes
 Start a shell in the deployment container:
 ```bash
 ./sat-deploy.sh env cmd -e ENV_ID="${ENV_ID}"
@@ -85,7 +89,6 @@ Connect to your Cloud Account and Openshift cluster:
 ```bash
 ibmcloud login --apikey $IBM_CLOUD_API_KEY --no-region
 ibmcloud oc cluster config --admin -c "${ENV_ID}-sat-roks"
-
 ```
 
 ```bash
