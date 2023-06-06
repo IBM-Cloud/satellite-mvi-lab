@@ -44,7 +44,7 @@ export STATUS_DIR=$(pwd)/data/status/sample
 export CONFIG_DIR=$(pwd)/data/config/sample
 export IBM_CLOUD_API_KEY=*****
 export IBM_ODF_API_KEY=*****
-export ENV_ID=xy-mvi5  # update
+export ENV_ID=xy-mvi5  # replace with the name of your environment
 export OCP_PULL_SECRET=''  # If you have a pull secret for OCP, set this variable. Keep the single quotes around the pull secret
 
 ./sat-deploy.sh env apply -e env_id="${ENV_ID}" -e IBM_ODF_API_KEY="${IBM_ODF_API_KEY}" -e OCP_PULL_SECRET='${OCP_PULL_SECRET}' -v
@@ -55,19 +55,33 @@ If you want to open the OpenShift console at this stage, connect to the private 
 data/status/sample/downloads/client.conf
 ```
 
+It will take a while till you can view the resources created and in normal state. You can track the status of the resources created by reviewing the logs 
+
+Confirm the Satellite Location is created successfully
+```
+ibmcloud sat location get --location ${ENV_ID}-sat
+```
+
+Confirm the OpenShift cluster is created successfully
+```
+ibmcloud sat cluster get --cluster ${ENV_ID}-sat-roks
+```
 ## 4. Configure OpenShift Data Foundation(ODF)
 
 This step is done by the automation. For background information visit [ui-docs/odf.md](./ui-docs/odf.md)
-You can confirm the that the storage assignment is successful by running the following command
+- You can confirm the that the storage assignment is successful by running the following command
 ```
 ibmcloud sat storage config get --config ${ENV_ID}-odf-local
 ```
-
 ## 5. Activate OpenShift registry
 
 This step is done by the automation. For background information visit [ui-docs/registry.md](./ui-docs/registry.md)
-
-
+- Confirm the image registry is created successfully
+```
+oc get pvc openshift-image-registry -n openshift-image-registry
+NAME                       STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS          AGE
+openshift-image-registry   Bound    pvc-3c333a3b-472f-4fd0-95fa-74f252a3aece   100Gi      RWX            sat-ocs-cephfs-gold   19h
+```
 ## 6. Add a GPU node to the environment
 > Estimated time: 10 minutes
 
@@ -80,6 +94,7 @@ Stay in the same shell as before, then requirement variables are still set. Exec
 
 ### Deploy the Nvidia GPU operator
 > Estimated time: 15 minutes
+
 Start a shell in the deployment container:
 ```bash
 ./sat-deploy.sh env cmd -e ENV_ID="${ENV_ID}"
@@ -90,16 +105,24 @@ Connect to your Cloud Account and Openshift cluster:
 ibmcloud login --apikey $IBM_CLOUD_API_KEY --no-region
 ibmcloud oc cluster config --admin -c "${ENV_ID}-sat-roks"
 ```
-
 ```bash
 ROLE_NAME=nvidia_gpu ansible-playbook ibm.mas_devops.run_role
 ```
 Normally this step would fail with Satellite ROKS clusters because of the following issue https://github.com/NVIDIA/gpu-operator/issues/428. We addressed this automatically in previous steps of the automation, which sets the right imagetag for the NVIDIA operator.
 <br>
+
+Confirm that the ClusterPolicy is successfully created and is in ready state:
+```
+oc get clusterpolicy -n nvidia-gpu-operator
+
+NAME                 STATUS   AGE
+gpu-cluster-policy   ready    2023-06-05T18:52:38Z
+```
+
 To learn more about this step and troubleshooting, visit [ui-docs/gpu.md](./ui-docs/gpu.md)
 
 ## 7. Install Maximo core
-
+> Estimate time: 1 hour
 - Copy Maximo configuration files:
 
 ```bash
@@ -119,11 +142,16 @@ ansible-playbook ibm.mas_devops.oneclick_core
 ```
 
 - Take a note of the superuser name and password displayed at the end of the playbook.
-<br>
+
+<br>The superuser credentials are saved in ```${MAS_INSTANCE_ID}-credentials-superuser``` secret. You can get the route for the admin dashboard anytime using the following command.
+```
+oc get route ${MAS_INSTANCE_ID}-admin in mas-${ENV_ID}-core
+```
 
 For more information on this step, visit [ui-docs/mas.md](./ui-docs/mas.md)
 
 ## 8. Install MVI
+> Estimated time: 30 minutes
 
 ```bash
 source /data/status/mvi/masEnv.sh
@@ -144,19 +172,20 @@ oc patch scc ibm-mas-visualinspection-scc \
 Trigger recreation of MVI pods
 
 ```bash
-oc delete pod -n mas-inst1-visualinspection --all
+oc delete pod -n mas-${MAS_INSTANCE_ID}-visualinspection --all
 ```
 
 Wait until all pods have been recreated. The pvc task pod is expected to fail after the patch. The job did complete before the patch.
 
 ```bash
-oc get pod -n mas-inst1-visualinspection
+oc get pod -n mas-${MAS_INSTANCE_ID}-visualinspection
 ```
 <br>
 
 For more information on this step, visit [ui-docs/mvi.md](./ui-docs/mvi.md)
 
 ## 9. Login as superuser and create admin user
+>Estimated time: 3 minutes
 
 - Using the superuser credentials that were created upon successful installation to login to MAS UI ```https://admin.<maximo-domain>```
 ![](images/mas-login.png)
@@ -169,6 +198,7 @@ For more information on this step, visit [ui-docs/mvi.md](./ui-docs/mvi.md)
 - Save the credentials, logout of the super user and login with the new admin user created to confirm access to the platform.
 
 ## 10. Expose MAS to the internet
+> Estimated time: 20 minutes
 
 - Edit configuration file ```data/config/sample/config/sat-ibm-cloud-roks.yaml``` and uncomment the loadbalancer.
 - Run the following command:
