@@ -20,29 +20,10 @@ The deployment automation is using an API Key of the IAM Service ID above to cre
 # login with a user which has super power in the IBM Cloud Account 
 ibmcloud login --sso
 # target the right resource group and region
-ibmcloud target -g mvi-on-sat -r eu-de
+ibmcloud target -g <YOUR RG> -r <YOUR IBM CLOUD REGION>
 # reset the API Key
-ibmcloud ks api-key reset --region eu-de
-```
-Without that step the automation will fail in creating the Satllite location with the followwing Error
-```bash
-Error: [ERROR] Error Creating Satellite Location: Bad Request
-{
-    "StatusCode": 400,
-    "Headers": {
-        "Cache-Control": [
-            "max-age=0, no-cache, no-store"
-        ],
- ...   },
-    "Result": {
-        "code": "A03e9b",
-        "description": "Failed to create an API key with IAM. Revise your request and try again.",
-        "incidentID": "3d3043bd-d24e-4a1d-a916-20bdee67665f",
-        "type": "Authentication"
-    },
-    "RawResult": null
-}
-```
+ibmcloud ks api-key reset --region <YOUR IBM CLOUD REGION>
+
 
 ## Create an IAM Service ID for OpenShift Data Foundation (ODF)
 * Create an IAM Service ID "odf-local"
