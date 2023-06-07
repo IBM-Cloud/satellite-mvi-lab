@@ -20,7 +20,7 @@ The deployment automation is using an API Key of the IAM Service ID above to cre
 # login with a user which has super power in the IBM Cloud Account 
 ibmcloud login --sso
 # target the right resource group and region
-ibmcloud target -g mv-on-sat -r eu-de
+ibmcloud target -g mvi-on-sat -r eu-de
 # reset the API Key
 ibmcloud ks api-key reset --region eu-de
 ```
