@@ -14,12 +14,44 @@ As Account Owner create an IBM Cloud Resource Group in the account management, i
 * Assign the Service ID to the access group "mvi-on-sat"
 * Create and save an API Key for that Service ID, this will be our IBM_CLOUD_API_KEY key for deployment
 
+## Reset the IBM Cloud Kubernetes API Key for your region and Resource Group
+The deployment automation is using an API Key of the IAM Service ID above to create the Satellite location and OpenShift cluster. To be able to use a Service ID API Key instead a User based API Key we need to reset the IBM Cloud Kubernetes API Key for the *Region and Resource Group* where we target the deployment. See also the doc "[Understanding how the API key works](http://ibm.biz/api-key)".
+```bash
+# login with a user which has super power in the IBM Cloud Account 
+ibmcloud login --sso
+# target the right resource group and region
+ibmcloud target -g mv-on-sat -r eu-de
+# reset the API Key
+ibmcloud ks api-key reset --region eu-de
+```
+Without that step the automation will fail in creating the Satllite location with the followwing Error
+```bash
+Error: [ERROR] Error Creating Satellite Location: Bad Request
+{
+    "StatusCode": 400,
+    "Headers": {
+        "Cache-Control": [
+            "max-age=0, no-cache, no-store"
+        ],
+ ...   },
+    "Result": {
+        "code": "A03e9b",
+        "description": "Failed to create an API key with IAM. Revise your request and try again.",
+        "incidentID": "3d3043bd-d24e-4a1d-a916-20bdee67665f",
+        "type": "Authentication"
+    },
+    "RawResult": null
+}
+```
+
 ## Create an IAM Service ID for OpenShift Data Foundation (ODF)
 * Create an IAM Service ID "odf-local"
 * Give the Service ID the following permissions
 <p align="center"><img src="images/odf-service.id.png" width="800" style="background-color: white"/></p>
 
 * create and save an API Key for that Service ID, this will be used to deploy OpenShift Data Foundation using IBM Cloud Satellite storage templates.
+
+
 
 ## Domain Name and DNS Server
 Maximo Application Suite installation requires you to register a couple of DNS records for the chosen Maximo domain. In most cases, clients already own a domain and have a certificate authoriy in place. You may follow the steps in this section to set up your own domain provided by IBM Cloud or Cloudflare. It might take up to 24 hours to have your domain configurations verified (but in general it is much faster).<br>
