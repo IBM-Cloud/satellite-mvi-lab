@@ -185,3 +185,45 @@ If the command fails due to some reason (timeout), start it again.
 ```bash
 ./sat-deploy.sh env destroy -e env_id="${ENV_ID}" --confirm-destroy
 ```
+
+# Troubleshooting
+## satdeploy.sh error message "specify at least one container name or ID to log"
+If you have an error like this restart podman machine and try again:
+```bash
+./sat-deploy.sh env apply -e env_id="${ENV_ID}" -e IBM_ODF_API_KEY="${IBM_ODF_API_KEY}" -e OCP_PULL_SECRET='${OCP_PULL_SECRET}' -v
+Extra parameters (0): env_id=xy-mvi5
+Extra parameters (1): IBM_ODF_API_KEY=XXXX
+Extra parameters (2): OCP_PULL_SECRET=${OCP_PULL_SECRET}
+Error: statfs /Users/lionelmace/git/satellite-mvi-lab/data/status/sample: no such file or directory
+Error: specify at least one container name or ID to log
+Error: accepts 1 arg(s), received 0
+```
+
+```bash
+podman machine stop
+podman machine start
+```
+
+## Error cretaing Satellite Location via Terraform
+If you see a message like this, your IBM Cloud Kubernetes API Key needs to be reset before you could run the automation, see [Reset Kubernetes API Key](./prerequisites.md#reset-the-ibm-cloud-kubernetes-api-key-for-your-region-and-resource-group) 
+``` bash
+Error: [ERROR] Error Creating Satellite Location: Bad Request
+{
+    "StatusCode": 400,
+    "Headers": {
+        "Cache-Control": [
+            "max-age=0, no-cache, no-store"
+        ],
+ ...   },
+    "Result": {
+        "code": "A03e9b",
+        "description": "Failed to create an API key with IAM. Revise your request and try again.",
+        "incidentID": "3d3043bd-d24e-4a1d-a916-20bdee67665f",
+        "type": "Authentication"
+    },
+    "RawResult": null
+}
+
+```
+
+
