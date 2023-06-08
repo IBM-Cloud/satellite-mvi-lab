@@ -71,7 +71,7 @@ Stay in the same shell as before, then requirement variables are still set. Exec
 that due to limited capacity of GPU instances this command may fail. If it fails, try a different zone.
 
 ```bash
-./sat-deploy.sh env apply -e env_id="${ENV_ID}" -v --confirm-destroy
+./sat-deploy.sh env apply -e env_id="${ENV_ID}" -e IBM_ODF_API_KEY="${IBM_ODF_API_KEY}" -e OCP_PULL_SECRET='${OCP_PULL_SECRET}' -v --confirm-destroy
 ```
 
 ### Deploy the Nvidia GPU operator
@@ -171,7 +171,7 @@ For more information on this step, visit [ui-docs/mvi.md](./ui-docs/mvi.md)
 - Run the following command:
 
 ```bash
-./sat-deploy.sh env apply -e env_id="${ENV_ID}" -v
+./sat-deploy.sh env apply -e env_id="${ENV_ID}" -e IBM_ODF_API_KEY="${IBM_ODF_API_KEY}" -e OCP_PULL_SECRET='${OCP_PULL_SECRET}' -v
 ```
 
 ## 11. Load demo model and conect MVI mobile
