@@ -23,7 +23,7 @@ ibmcloud login --sso
 ibmcloud target -g <YOUR RG> -r <YOUR IBM CLOUD REGION>
 # reset the API Key
 ibmcloud ks api-key reset --region <YOUR IBM CLOUD REGION>
-
+```
 
 ## Create an IAM Service ID for OpenShift Data Foundation (ODF)
 * Create an IAM Service ID "odf-local"
