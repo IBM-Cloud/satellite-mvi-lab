@@ -7,8 +7,11 @@
     - set_fact:
         _cluster_subdomain: "{{ output.stdout | from_json | json_query('[*].nlbHost') | first }}"
 
+    - set_fact:
+        _nlbIPArray: "{{ output.stdout | from_json | json_query('[*].nlbIPArray') | first }}"
+
     - debug:
-        var: _cluster_subdomain
+        var: _nlbIPArray
 
 - name: output cluster domain
   debug:
@@ -26,11 +29,11 @@
 
 - name: remove workers from dns
   command: ibmcloud oc nlb-dns rm vpc-gen2 -c {{_cluster_id}} --nlb-subdomain {{_cluster_subdomain}} --ip {{_host}}
-  ignore_errors: true
   vars:
     _host: "{{item}}"
-  loop: "{{ sat_hosts_ocp }}"
+  loop: "{{ _nlbIPArray }}"
+  loop_control:
+    pause: 10
   
 - name: add lb to dns
   command: ibmcloud oc nlb-dns add -c {{ _cluster_id }} --ip {{ _lb_public_ip }} --nlb-host {{_cluster_subdomain}} -q
-  ignore_errors: true
