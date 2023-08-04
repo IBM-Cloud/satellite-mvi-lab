@@ -57,8 +57,8 @@ cos:
     region_location: {{ ibm_cloud_region }}
 
 custom_image:
-- name: {{ env_id }}-rhcos410
-  href: "cos://eu-de/images-mvi-on-sat/rhcos-4.10.37-x86_64-ibmcloud.x86_64.qcow2"
+- name: {{ env_id }}-rhcos412
+  href: "cos://eu-de/cloud-object-storage-lite-cos-standard-images/rhcos-4.12.17-x86_64-ibmcloud.x86_64.qcow2"
   operating_system: fedora-coreos-stable-amd64
 
 satellite:
@@ -67,11 +67,11 @@ satellite:
   bucket: {{ env_id }}-satellite-<random>
   services:
     openshift:
-      version: '4.10'
+      version: '4.12'
       os: RHCOS
       storage:
         template: odf-local
-        version: '4.10'
+        version: '4.11'
         device_path: '/dev/vde'
 
 vsi:
@@ -90,7 +90,7 @@ sat_host:
   flavour: cp
   sat_zone_idx: 1
   infrastructure:
-    image: {{ env_id }}-rhcos410
+    image: {{ env_id }}-rhcos412
     subnet: {{ env_id }}-subnet-zone-1
     primary_ipv4_address: 10.231.0.16
     bastion_host: {{ env_id }}-bastion
@@ -100,7 +100,7 @@ sat_host:
   flavour: cp
   sat_zone_idx: 2
   infrastructure:
-    image: {{ env_id }}-rhcos410
+    image: {{ env_id }}-rhcos412
     subnet: {{ env_id }}-subnet-zone-2
     primary_ipv4_address: 10.231.0.70
     bastion_host: {{ env_id }}-bastion
@@ -110,7 +110,7 @@ sat_host:
   flavour: cp
   sat_zone_idx: 3
   infrastructure:
-    image: {{ env_id }}-rhcos410
+    image: {{ env_id }}-rhcos412
     subnet: {{ env_id }}-subnet-zone-3
     primary_ipv4_address: 10.231.0.140
     bastion_host: {{ env_id }}-bastion
@@ -120,7 +120,7 @@ sat_host:
   flavour: odf
   sat_zone_idx: 1
   infrastructure:
-    image: {{ env_id }}-rhcos410
+    image: {{ env_id }}-rhcos412
     subnet: {{ env_id }}-subnet-zone-1
     primary_ipv4_address: 10.231.0.18
     bastion_host: {{ env_id }}-bastion
@@ -130,7 +130,7 @@ sat_host:
   flavour: odf
   sat_zone_idx: 2
   infrastructure:
-    image: {{ env_id }}-rhcos410
+    image: {{ env_id }}-rhcos412
     subnet: {{ env_id }}-subnet-zone-2
     primary_ipv4_address: 10.231.0.72
     bastion_host: {{ env_id }}-bastion
@@ -140,7 +140,7 @@ sat_host:
   flavour: odf
   sat_zone_idx: 3
   infrastructure:
-    image: {{ env_id }}-rhcos410
+    image: {{ env_id }}-rhcos412
     subnet: {{ env_id }}-subnet-zone-3
     primary_ipv4_address: 10.231.0.142
     bastion_host: {{ env_id }}-bastion
@@ -150,7 +150,7 @@ sat_host:
 #   flavour: gpu
 #   sat_zone_idx: 3
 #   infrastructure:
-#     image: {{ env_id }}-rhcos410
+#     image: {{ env_id }}-rhcos412
 #     subnet: {{ env_id }}-subnet-zone-3
 #     bastion_host: {{ env_id }}-bastion
 #     keys:

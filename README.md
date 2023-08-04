@@ -5,7 +5,7 @@ It was stripped down before satellite specific components weere added (still hol
 
 The following steps will install Maximo Visual Inspection on an OpenShift cluster managed by IBM Cloud Satellite. For the purpose of this lab, the satellite location is hosted on IBM Cloud VPC.
 
-At the time of writing this MVI 8.8, which comes with Maximo Application Suite 8.10, supports only OpenShift 4.10. As a result this only has been tested on OpenShift 4.10 so far.
+At the time of writing this MVI 8.8, which comes with Maximo Application Suite 8.10, supports only OpenShift 4.10. With support of MVI for OpenShift 4.12 this is now tested with 4.12.
 
 <p align="center"><img src="images/deployment.png" width="400" style="background-color: white"/></p>
 
