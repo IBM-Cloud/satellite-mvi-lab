@@ -21,7 +21,7 @@ RUN yum install -y yum-utils python39 python39-pip && \
 RUN pip3 install ansible
 
 RUN ansible-galaxy collection install community.general community.crypto ansible.utils community.vmware kubernetes.core
-RUN ansible-galaxy collection install ibm.mas_devops:13.15.1
+RUN ansible-galaxy collection install ibm.mas_devops
 
 VOLUME ["/Data"]
 
