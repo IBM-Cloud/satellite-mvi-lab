@@ -107,6 +107,14 @@ cp -r ./sample-configurations/mvi/* data/status/sample/mvi
 - Edit and complete ```data/status/sample/mvi/masEnv.sh```
 Look for all parametes in brackets \<param>
 
+- Create a config map in namespace ibm-common-services. This is required to ibm-commmon-services operator.
+
+```bash
+oc create namespace ibm-common-services
+oc apply -f data/status/sample/mvi/ibm-cpp-config.yaml
+
+```
+
 - Run the automation playbook. cmd container should be still running. If not start again and login to OpenShift.
 
 ```bash
