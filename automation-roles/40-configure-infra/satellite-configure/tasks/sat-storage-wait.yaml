@@ -1,9 +1,16 @@
 ---
 - name: wait for storage
   delegate_to: "{{groups['vpc_bastion_server'][0]}}"
+  delegate_facts: false
+  vars:
+    ansible_remote_tmp: /tmp
   block:
   - debug:
       var: groups['vpc_bastion_server'][0]
+
+  - name: Set the retry count
+    set_fact:
+      retry_count: "{{ 0 if retry_count is undefined else retry_count | int + 1 }}"
 
   - name: login to openshift
     shell: |
@@ -15,7 +22,25 @@
       kind: OcsCluster
       name: 'ocscluster-auto'
     register: ocs_result
-    until: ocs_result | json_query('resources[*].status.storageClusterStatus') | default(['error'], true) | first == 'Ready'
-    retries: 60
-    delay: 60
+    failed_when: ocs_result | json_query('resources[*].status.storageClusterStatus') | default(['error'], true) | first != 'Ready'
 
+  - name: Reset retry count after success
+    set_fact:
+      retry_count: 0
+
+  rescue:
+    - name: Reset retry count if max retries reached (exit loop)
+      set_fact:
+        retry_count: 0
+      failed_when: retry_count | int == 0
+      when: retry_count | int >= 60
+
+    - debug:
+        msg: "ODF not ready - Retrying..."
+
+    - name: Sleep between retries
+      delegate_to: localhost
+      wait_for:
+        timeout: 60 # seconds
+
+    - include_tasks: sat-storage-wait.yaml
